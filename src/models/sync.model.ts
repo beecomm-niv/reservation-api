@@ -9,10 +9,10 @@ interface Params {
   syncId: string;
   syncAt: string;
   order: any; // TODO
-  reservation: Reservation;
+  reservation: HostReservation;
 }
 
-interface Reservation {
+interface HostReservation {
   reservationId: string;
   createdBy: string;
   createdAt: string;

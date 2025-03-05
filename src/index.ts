@@ -1,5 +1,6 @@
-import run from './server';
+import 'express-async-errors';
 
+import run from './server';
 import express from 'express';
 import dotnev from 'dotenv';
 
