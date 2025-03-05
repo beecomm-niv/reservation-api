@@ -20,8 +20,6 @@ export class DB {
       });
 
       this.instance = new DynamoDB.DocumentClient();
-
-      console.log('instance created...');
     }
 
     return this.instance;
