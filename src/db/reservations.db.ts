@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { Reservation } from '../models/Reservation.model';
+import { Reservation } from '../models/reservation.model';
 import { Sync } from '../models/sync.model';
 import { DB } from './db';
 
