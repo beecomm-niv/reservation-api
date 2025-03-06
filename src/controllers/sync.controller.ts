@@ -1,4 +1,4 @@
-import { ReservationsDB, SyncQureyRequest } from '../db/reservations.db';
+import { ReservationsDB } from '../db/reservations.db';
 import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
@@ -32,14 +32,19 @@ export class SyncController {
   };
 
   public static querySync: ControllerHandler<Sync[]> = async (req, res) => {
-    const body: SyncQureyRequest = req.body;
+    const { clientPhone, branchId, full } = req.query;
 
-    if (!body.branchId && !body.clientPhone) {
+    if (!clientPhone) {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    const service = new ReservationsDB();
+    if (typeof clientPhone !== 'string') {
+      throw ErrorResponse.InvalidParams();
+    }
 
-    res.send(ApiResponse.success([]));
+    const service = new ReservationsDB();
+    const data = await service.querySync(full === 'true', clientPhone, typeof branchId === 'string' ? branchId : undefined);
+
+    res.send(ApiResponse.success(data));
   };
 }
