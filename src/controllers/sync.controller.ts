@@ -28,10 +28,6 @@ export class SyncController {
     const service = new ReservationsDB();
     const sync = await service.getSync(syncId);
 
-    if (!sync) {
-      throw ErrorResponse.MissingSync();
-    }
-
     res.send(ApiResponse.success(sync));
   };
 
@@ -43,8 +39,7 @@ export class SyncController {
     }
 
     const service = new ReservationsDB();
-    const response = await service.querySync(body);
 
-    res.send(ApiResponse.success(response));
+    res.send(ApiResponse.success([]));
   };
 }

@@ -1,4 +1,5 @@
 import { config, DynamoDB } from 'aws-sdk';
+import { ErrorResponse } from '../models/error-response.model';
 
 export class DB {
   protected static instance: DynamoDB.DocumentClient;
@@ -23,5 +24,28 @@ export class DB {
     }
 
     return this.instance;
+  };
+
+  public setItemByKey = async (item: any) =>
+    await this.db
+      .put({
+        TableName: this.tableName,
+        Item: item,
+      })
+      .promise();
+
+  public findItemByKey = async <T>(key: DynamoDB.DocumentClient.Key): Promise<T> => {
+    const response = await this.db
+      .get({
+        TableName: this.tableName,
+        Key: key,
+      })
+      .promise();
+
+    if (!response.Item) {
+      throw ErrorResponse.ItemNotFound();
+    }
+
+    return response.Item as T;
   };
 }
