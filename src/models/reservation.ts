@@ -1,9 +1,10 @@
 import { Sync } from './sync.model';
 
-interface OrderSummery {
+export interface OrderSummery {
   branchName: string;
   clientName: string;
 
+  table: number;
   dinners: number;
   totalOrder: number;
   discount: number;
@@ -16,6 +17,6 @@ export interface Reservation {
   clientPhone: string;
   ts: number;
 
-  orderSummery: OrderSummery;
+  orderSummery?: OrderSummery;
   sync: Sync;
 }

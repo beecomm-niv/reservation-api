@@ -1,28 +1,47 @@
 import dayjs from 'dayjs';
 import { Sync } from '../models/sync.model';
 import { DB } from './db';
-import { Reservation } from '../models/reservation';
+import { OrderSummery, Reservation } from '../models/reservation';
 
 export class ReservationsDB extends DB {
   constructor() {
     super('reservations');
   }
 
-  public setReservation = async (sync: Sync) => {
+  private getOrderSummeryFromSync = (sync: Sync, branchName: string) => {
+    if (!sync.params.order) return undefined;
+
+    const order = sync.params.order;
+    const summery: OrderSummery = {
+      branchName,
+      clientName: sync.params.reservation.patron.name,
+      table: order.tableInfo.tableNum,
+      dinners: order.tableInfo.dinners,
+      discount: order.tableInfo.discount,
+      service: order.tableInfo.service,
+      totalOrder: 0,
+    };
+
+    summery.discount = order.tableInfo.discount;
+    summery.service = order.tableInfo.service;
+    summery.dinners = order.tableInfo.dinners;
+    summery.table = order.tableInfo.tableNum;
+
+    order.dishes.forEach((d) => {
+      summery.totalOrder += d.totalPrice;
+      d.toppings.forEach((t) => (summery.totalOrder += t.totalPrice));
+    });
+
+    return summery;
+  };
+
+  public setReservation = async (sync: Sync, branchName: string) => {
     // TODO: set branchId to beecommBranch + calc order  summery from order
     const reservation: Reservation = {
       syncId: sync.params.syncId,
       branchId: sync.branchId,
       clientPhone: sync.params.reservation.patron.phone.replace('+', ''),
-      orderSummery: {
-        branchName: '',
-        clientName: sync.params.reservation.patron.name,
-        dinners: 0,
-        discount: 0,
-        service: 0,
-        totalOrder: 0,
-      },
-
+      orderSummery: this.getOrderSummeryFromSync(sync, branchName),
       ts: dayjs(sync.params.syncAt).valueOf(),
       sync,
     };
@@ -30,7 +49,7 @@ export class ReservationsDB extends DB {
     await this.setItemByKey(reservation);
   };
 
-  public getSync = async (syncId: string) => await this.findItemByKey<Sync>({ syncId });
+  public getReservation = async (syncId: string) => await this.findItemByKey<Reservation>({ syncId });
 
   public querySync = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Sync[]> => {
     const condition = 'clientPhone = :phone' + (branchId ? ' And branchId = :branch' : '');

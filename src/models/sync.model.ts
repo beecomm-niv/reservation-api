@@ -1,3 +1,5 @@
+import { Order } from './order.model';
+
 export interface Sync {
   action: string;
   restaurantId: string;
@@ -8,7 +10,7 @@ export interface Sync {
 interface Params {
   syncId: string;
   syncAt: string;
-  order: any; // TODO
+  order?: Order;
   reservation: HostReservation;
 }
 
