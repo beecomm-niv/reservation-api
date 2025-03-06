@@ -1,6 +1,11 @@
 import { config, DynamoDB } from 'aws-sdk';
 import { ErrorResponse } from '../models/error-response.model';
 
+interface InsertOptions {
+  primaryKey: string;
+  deniedOverride: boolean;
+}
+
 export class DB {
   protected static instance: DynamoDB.DocumentClient;
 
@@ -26,13 +31,21 @@ export class DB {
     return this.instance;
   };
 
-  public setItemByKey = async (item: any) =>
+  public setItemByKey = async <T>(item: T, options?: InsertOptions) => {
+    const deniedOverride = options?.deniedOverride && options.primaryKey;
+
+    const condition = deniedOverride ? `attribute_not_exists(#${options.primaryKey})` : undefined;
+    const alias = deniedOverride ? { [`#${options.primaryKey}`]: options?.primaryKey } : undefined;
+
     await this.db
       .put({
         TableName: this.tableName,
-        Item: item,
+        Item: item as any,
+        ExpressionAttributeNames: alias,
+        ConditionExpression: condition,
       })
       .promise();
+  };
 
   public findItemByKey = async <T>(key: DynamoDB.DocumentClient.Key): Promise<T> => {
     const response = await this.db
