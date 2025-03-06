@@ -39,7 +39,7 @@ export class SyncController {
     res.send(ApiResponse.success(sync));
   };
 
-  public static queryReservations: ControllerHandler<Sync[]> = async (req, res) => {
+  public static queryReservations: ControllerHandler<Reservation[]> = async (req, res) => {
     const { clientPhone, branchId, full } = req.query;
 
     if (!clientPhone) {

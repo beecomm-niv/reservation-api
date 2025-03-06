@@ -46,7 +46,7 @@ export class ReservationsDB extends DB {
 
   public getReservation = async (syncId: string) => await this.findItemByKey<Reservation>({ syncId });
 
-  public queryReservations = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Sync[]> => {
+  public queryReservations = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Reservation[]> => {
     const condition = 'clientPhone = :phone' + (branchId ? ' And branchId = :branch' : '');
     const values: Record<string, any> = {
       ':phone': clientPhone,
@@ -68,6 +68,6 @@ export class ReservationsDB extends DB {
       })
       .promise();
 
-    return (response.Items || []) as Sync[];
+    return (response.Items || []) as Reservation[];
   };
 }
