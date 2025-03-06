@@ -13,7 +13,7 @@ interface SetOrderBody {
 }
 
 export class SyncController {
-  public static setSync: ControllerHandler<null> = async (req, res) => {
+  public static setReservation: ControllerHandler<null> = async (req, res) => {
     const body: Sync = req.body;
 
     if (!body.branchId || !body.params.syncId) {
@@ -26,7 +26,7 @@ export class SyncController {
     res.send(ApiResponse.success(null));
   };
 
-  public static getSync: ControllerHandler<Reservation> = async (req, res) => {
+  public static getReservation: ControllerHandler<Reservation> = async (req, res) => {
     const syncId = req.params.id;
 
     if (!syncId) {
@@ -39,7 +39,7 @@ export class SyncController {
     res.send(ApiResponse.success(sync));
   };
 
-  public static querySync: ControllerHandler<Sync[]> = async (req, res) => {
+  public static queryReservations: ControllerHandler<Sync[]> = async (req, res) => {
     const { clientPhone, branchId, full } = req.query;
 
     if (!clientPhone) {
@@ -51,7 +51,7 @@ export class SyncController {
     }
 
     const service = new ReservationsDB();
-    const data = await service.querySync(full === 'true', clientPhone, typeof branchId === 'string' ? branchId : undefined);
+    const data = await service.queryReservations(full === 'true', clientPhone, typeof branchId === 'string' ? branchId : undefined);
 
     res.send(ApiResponse.success(data));
   };

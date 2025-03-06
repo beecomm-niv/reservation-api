@@ -22,11 +22,6 @@ export class ReservationsDB extends DB {
       totalOrder: 0,
     };
 
-    summery.discount = order.tableInfo.discount;
-    summery.service = order.tableInfo.service;
-    summery.dinners = order.tableInfo.dinners;
-    summery.table = order.tableInfo.tableNum;
-
     order.dishes.forEach((d) => {
       summery.totalOrder += d.totalPrice;
       d.toppings.forEach((t) => (summery.totalOrder += t.totalPrice));
@@ -36,7 +31,7 @@ export class ReservationsDB extends DB {
   };
 
   public setReservation = async (sync: Sync, branchName: string) => {
-    // TODO: set branchId to beecommBranch + calc order  summery from order
+    // TODO: set branchId to beecommBranch
     const reservation: Reservation = {
       syncId: sync.params.syncId,
       branchId: sync.branchId,
@@ -51,7 +46,7 @@ export class ReservationsDB extends DB {
 
   public getReservation = async (syncId: string) => await this.findItemByKey<Reservation>({ syncId });
 
-  public querySync = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Sync[]> => {
+  public queryReservations = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Sync[]> => {
     const condition = 'clientPhone = :phone' + (branchId ? ' And branchId = :branch' : '');
     const values: Record<string, any> = {
       ':phone': clientPhone,

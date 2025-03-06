@@ -3,9 +3,9 @@ import { SyncController } from '../controllers/sync.controller';
 
 const router = Router();
 
-router.get('/:id', SyncController.getSync);
-router.post('/', SyncController.setSync);
-router.post('/query', SyncController.querySync);
+router.get('/:id', SyncController.getReservation);
+router.post('/', SyncController.setReservation);
+router.post('/query', SyncController.queryReservations);
 router.post('/order', SyncController.setOrderToReservation);
 
 export const syncRouter = router;
