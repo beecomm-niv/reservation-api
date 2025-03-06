@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
-import { Reservation } from '../models/reservation.model';
 import { Sync } from '../models/sync.model';
 import { DB } from './db';
+import { Reservation } from '../models/reservation';
 
 export class ReservationsDB extends DB {
   constructor() {
