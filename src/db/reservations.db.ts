@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Reservation } from '../models/Reservation.model';
 import { Sync } from '../models/sync.model';
 import { DB } from './db';
@@ -27,7 +28,7 @@ export class ReservationsDB extends DB {
         totalOrder: 0,
       },
 
-      ts: 0,
+      ts: dayjs(sync.params.syncAt).valueOf(),
       sync,
     };
 
