@@ -3,25 +3,23 @@ import { ErrorResponse } from '../models/error-response.model';
 import { JwtPayload } from '../models/jwt-payload.model';
 
 export class JwtService {
-  public static sign = (payload: JwtPayload) => {
-    const secret = process.env.JWT_SECRET;
+  private static SECRET = process.env.JWT_SECRET;
 
-    if (!secret) {
+  public static sign = (payload: JwtPayload) => {
+    if (!this.SECRET) {
       throw ErrorResponse.AuthorizationError();
     }
 
-    return jwt.sign(payload, secret, { expiresIn: '2d' });
+    return jwt.sign(payload, this.SECRET, { expiresIn: '2d' });
   };
 
   public static verify = (token: string): JwtPayload | null => {
     try {
-      const secret = process.env.JWT_SECRET;
-
-      if (!secret) {
+      if (!this.SECRET) {
         throw ErrorResponse.AuthorizationError();
       }
 
-      const response = jwt.verify(token, secret);
+      const response = jwt.verify(token, this.SECRET);
 
       return response as JwtPayload;
     } catch {
