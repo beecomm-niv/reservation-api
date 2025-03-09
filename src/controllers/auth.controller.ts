@@ -25,6 +25,7 @@ export class AuthController {
     const hasAccess = this.isHaveAccess(payload, role, withServiceAccess, access);
 
     if (hasAccess) {
+      req.user = payload;
       next();
     } else {
       throw ErrorResponse.AccessDenied();
