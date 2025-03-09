@@ -106,8 +106,9 @@
 
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "outDir": "./dist", // מגדיר את תיקיית ה-output של הקבצים המתקמפל
-    "rootDir": "./src", // מגדיר את תיקיית המקורות (היכן שממוקמים קבצי ה-TypeScript שלך)
-    "skipLibCheck": true // כדי לשפר את זמן הקימפול על ידי דילוג על בדיקות ספריות
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "resolveJsonModule": true
   }
 }
