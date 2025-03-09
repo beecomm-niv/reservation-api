@@ -12,7 +12,7 @@ interface SetOrderBody {
   order: Order;
 }
 
-export class SyncController {
+export class ReservationsController {
   public static setReservation: ControllerHandler<null> = async (req, res) => {
     const body: Sync = req.body;
 

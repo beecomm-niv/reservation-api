@@ -1,13 +1,13 @@
 import { Router } from 'express';
-import { SyncController } from '../controllers/sync.controller';
+import { ReservationsController } from '../controllers/reservations.controller';
 import { AuthController } from '../controllers/auth.controller';
 
 const router = Router();
 
-router.get('/:id', AuthController.verify('user', false), SyncController.getReservation);
-router.post('/', AuthController.verify('service', true, 'sync'), SyncController.setReservation);
+router.get('/:id', AuthController.verify('user', false), ReservationsController.getReservation);
+router.post('/', AuthController.verify('service', true, 'sync'), ReservationsController.setReservation);
 
 // router.post('/query', SyncController.queryReservations);
 // router.post('/order', SyncController.setOrderToReservation);
 
-export const syncRouter = router;
+export const reservationsRouter = router;

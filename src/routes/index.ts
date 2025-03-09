@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { syncRouter } from './sync.routes';
+import { reservationsRouter } from './sync.routes';
 import { servicesRouter } from './services.routes';
 
 const router = Router();
 
-router.use('/sync', syncRouter);
+router.use('/reservations', reservationsRouter);
 router.use('/service', servicesRouter);
 
 export const appRouter = router;
