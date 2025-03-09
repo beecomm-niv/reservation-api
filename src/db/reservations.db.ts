@@ -3,12 +3,10 @@ import { Sync } from '../models/sync.model';
 import { DB } from './db';
 import { OrderSummery, Reservation } from '../models/reservation';
 
-export class ReservationsDB extends DB {
-  constructor() {
-    super('reservations');
-  }
+export class ReservationsDB {
+  private static TABLE_NAME = 'reservations';
 
-  private getOrderSummeryFromSync = (sync: Sync, branchName: string) => {
+  private static getOrderSummeryFromSync = (sync: Sync, branchName: string) => {
     if (!sync.params.order) return undefined;
 
     const order = sync.params.order;
@@ -30,7 +28,7 @@ export class ReservationsDB extends DB {
     return summery;
   };
 
-  public setReservation = async (sync: Sync, branchName: string) => {
+  public static setReservation = async (sync: Sync, branchName: string) => {
     // TODO: set branchId to beecommBranch
     const reservation: Reservation = {
       syncId: sync.params.syncId,
@@ -41,12 +39,12 @@ export class ReservationsDB extends DB {
       sync,
     };
 
-    await this.setItemByKey(reservation);
+    await DB.getInstance().setItemByKey(this.TABLE_NAME, reservation);
   };
 
-  public getReservation = async (syncId: string) => await this.findItemByKey<Reservation>({ syncId });
+  public static getReservation = async (syncId: string) => await DB.getInstance().findItemByKey<Reservation>(this.TABLE_NAME, { syncId });
 
-  public queryReservations = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Reservation[]> => {
+  public static queryReservations = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Reservation[]> => {
     const condition = 'clientPhone = :phone' + (branchId ? ' And branchId = :branch' : '');
     const values: Record<string, any> = {
       ':phone': clientPhone,
@@ -58,9 +56,9 @@ export class ReservationsDB extends DB {
 
     const projection: string | undefined = fullFetch ? undefined : 'syncId, branchId, orderSummery, ts';
 
-    const response = await this.db
-      .query({
-        TableName: this.tableName,
+    const response = await DB.getInstance()
+      .client.query({
+        TableName: this.TABLE_NAME,
         IndexName: 'findByClient',
         KeyConditionExpression: condition,
         ExpressionAttributeValues: values,

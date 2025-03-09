@@ -20,8 +20,7 @@ export class SyncController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    const service = new ReservationsDB();
-    await service.setReservation(body, '');
+    await ReservationsDB.setReservation(body, '');
 
     res.send(ApiResponse.success(null));
   };
@@ -33,8 +32,7 @@ export class SyncController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    const service = new ReservationsDB();
-    const sync = await service.getReservation(syncId);
+    const sync = await ReservationsDB.getReservation(syncId);
 
     res.send(ApiResponse.success(sync));
   };
@@ -50,8 +48,7 @@ export class SyncController {
       throw ErrorResponse.InvalidParams();
     }
 
-    const service = new ReservationsDB();
-    const data = await service.queryReservations(full === 'true', clientPhone, typeof branchId === 'string' ? branchId : undefined);
+    const data = await ReservationsDB.queryReservations(full === 'true', clientPhone, typeof branchId === 'string' ? branchId : undefined);
 
     res.send(ApiResponse.success(data));
   };
@@ -63,13 +60,12 @@ export class SyncController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    const service = new ReservationsDB();
-    const reservation = await service.getReservation(body.syncId);
+    const reservation = await ReservationsDB.getReservation(body.syncId);
 
     const sync: Sync = { ...reservation.sync };
     sync.params.order = body.order;
 
-    await service.setReservation(sync, body.branchName);
+    await ReservationsDB.setReservation(sync, body.branchName);
 
     //TODO: send reservation to hosting service
 

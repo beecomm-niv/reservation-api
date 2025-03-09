@@ -3,13 +3,12 @@ import { Service } from '../models/service.model';
 import { DB } from './db';
 import crypto from 'crypto';
 
-export class ServicesDB extends DB {
-  constructor() {
-    super('services');
-  }
+export class ServicesDB {
+  private static TABLE_NAME = 'services';
 
-  public createService = async (name: string, access: string[]) =>
-    this.setItemByKey<Service>(
+  public static createService = async (name: string, access: string[]) =>
+    DB.getInstance().setItemByKey<Service>(
+      this.TABLE_NAME,
       {
         name,
         access,
@@ -22,10 +21,10 @@ export class ServicesDB extends DB {
       }
     );
 
-  public findServiceByKeyAndSecret = async (accessKey: string, accessSecret: string): Promise<Service> => {
-    const response = await this.db
-      .query({
-        TableName: this.tableName,
+  public static findServiceByKeyAndSecret = async (accessKey: string, accessSecret: string): Promise<Service> => {
+    const response = await DB.getInstance()
+      .client.query({
+        TableName: this.TABLE_NAME,
         IndexName: 'accessKeyId-accessSecretKey-index',
         KeyConditionExpression: 'accessKeyId = :k And accessSecretKey = :s',
         ExpressionAttributeValues: {

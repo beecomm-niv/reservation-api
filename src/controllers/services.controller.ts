@@ -22,8 +22,7 @@ export class ServiceController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    const service = new ServicesDB();
-    await service.createService(body.name, body.access);
+    await ServicesDB.createService(body.name, body.access);
 
     res.send(ApiResponse.success(null));
   };
@@ -35,8 +34,7 @@ export class ServiceController {
       throw ErrorResponse.SignatureDoesNotMatch();
     }
 
-    const db = new ServicesDB();
-    const service = await db.findServiceByKeyAndSecret(body.accessKeyId, body.accessSecretKey);
+    const service = await ServicesDB.findServiceByKeyAndSecret(body.accessKeyId, body.accessSecretKey);
     const token = JwtService.sign({ access: service.access, user: service.name });
 
     res.send(ApiResponse.success(token));

@@ -7,39 +7,37 @@ interface InsertOptions {
 }
 
 export class DB {
-  protected static instance: DynamoDB.DocumentClient;
+  protected static instance: DB;
 
-  protected db: DynamoDB.DocumentClient;
-  protected tableName: string;
+  public client: DynamoDB.DocumentClient;
 
-  constructor(tableName: string) {
-    this.db = DB.getInstance();
-    this.tableName = tableName;
+  constructor() {
+    config.update({
+      region: 'il-central-1',
+      accessKeyId: process.env.AWS_ACCESS_KEY,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    });
+
+    this.client = new DynamoDB.DocumentClient();
   }
 
-  private static getInstance = () => {
+  public static getInstance = () => {
     if (!this.instance) {
-      config.update({
-        region: 'il-central-1',
-        accessKeyId: process.env.AWS_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      });
-
-      this.instance = new DynamoDB.DocumentClient();
+      this.instance = new DB();
     }
 
     return this.instance;
   };
 
-  public setItemByKey = async <T>(item: T, options?: InsertOptions) => {
+  public setItemByKey = async <T>(tableName: string, item: T, options?: InsertOptions) => {
     const deniedOverride = options?.deniedOverride && options.primaryKey;
 
     const condition = deniedOverride ? `attribute_not_exists(#${options.primaryKey})` : undefined;
     const alias = deniedOverride ? { [`#${options.primaryKey}`]: options?.primaryKey } : undefined;
 
-    await this.db
+    await this.client
       .put({
-        TableName: this.tableName,
+        TableName: tableName,
         Item: item as any,
         ExpressionAttributeNames: alias,
         ConditionExpression: condition,
@@ -47,10 +45,10 @@ export class DB {
       .promise();
   };
 
-  public findItemByKey = async <T>(key: DynamoDB.DocumentClient.Key): Promise<T> => {
-    const response = await this.db
+  public findItemByKey = async <T>(tableName: string, key: DynamoDB.DocumentClient.Key): Promise<T> => {
+    const response = await this.client
       .get({
-        TableName: this.tableName,
+        TableName: tableName,
         Key: key,
       })
       .promise();
