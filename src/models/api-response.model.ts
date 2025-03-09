@@ -1,8 +1,8 @@
 export class ApiResponse<T> {
-  private result: boolean;
-  private data: T;
-  private message?: string;
-  private code: number;
+  result: boolean;
+  data: T;
+  message?: string;
+  code: number;
 
   private constructor(result: boolean, data: T, code: number, message?: string) {
     this.result = result;

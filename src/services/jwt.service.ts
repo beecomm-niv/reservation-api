@@ -14,16 +14,10 @@ export class JwtService {
   };
 
   public static verify = (token: string): JwtPayload | null => {
-    try {
-      if (!this.SECRET) {
-        throw ErrorResponse.AuthorizationError();
-      }
-
-      const response = jwt.verify(token, this.SECRET);
-
-      return response as JwtPayload;
-    } catch {
-      return null;
+    if (!this.SECRET) {
+      throw ErrorResponse.AuthorizationError();
     }
+
+    return jwt.verify(token, this.SECRET) as JwtPayload;
   };
 }
