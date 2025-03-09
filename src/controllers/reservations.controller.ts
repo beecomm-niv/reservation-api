@@ -20,7 +20,10 @@ export class ReservationsController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    await ReservationsDB.setReservation(body, '');
+    // TODO: for now we only handled seated reservations from external service host system. we handle all statuses once we have our host system.
+    if (body.params.reservation.status === 'seated') {
+      await ReservationsDB.setReservation(body, '');
+    }
 
     res.send(ApiResponse.success(null));
   };
@@ -67,7 +70,7 @@ export class ReservationsController {
 
     await ReservationsDB.setReservation(sync, body.branchName);
 
-    //TODO: send reservation to hosting service
+    // TODO: send reservation to hosting service
 
     res.send(ApiResponse.success(null));
   };
