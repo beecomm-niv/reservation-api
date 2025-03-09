@@ -34,7 +34,7 @@ export class AuthController {
   private static isHaveAccess = (user: JwtPayload, role: USER_ROLE, withServiceAccess: boolean, access?: ACCESS): boolean => {
     switch (user.role) {
       case 'service':
-        return withServiceAccess && user.access.some((a) => a === access);
+        return withServiceAccess && user.access.some((a) => a === '*' || a === access);
       default:
         return (this.USER_POWER[user.role] || -1) >= (this.USER_POWER[role] || 99);
     }
