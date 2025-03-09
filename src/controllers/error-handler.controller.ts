@@ -15,6 +15,6 @@ export class ErrorController {
       code = err.code;
     }
 
-    res.status(500).send(ApiResponse.error(code, message));
+    res.status(Math.min(code, 500)).send(ApiResponse.error(code, message));
   };
 }

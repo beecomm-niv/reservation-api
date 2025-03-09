@@ -2,11 +2,12 @@ import { ServicesDB } from '../db/services.db';
 import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
+import { ACCESS } from '../models/jwt-payload.model';
 import { JwtService } from '../services/jwt.service';
 
 interface CreateServiceBody {
   name: string;
-  access: string[];
+  access: ACCESS[];
 }
 
 interface GetTokenBody {
@@ -35,7 +36,7 @@ export class ServiceController {
     }
 
     const service = await ServicesDB.findServiceByKeyAndSecret(body.accessKeyId, body.accessSecretKey);
-    const token = JwtService.sign({ access: service.access, user: service.name });
+    const token = JwtService.sign({ access: service.access, id: service.name, role: 'service' });
 
     res.send(ApiResponse.success(token));
   };

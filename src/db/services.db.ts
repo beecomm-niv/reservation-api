@@ -1,4 +1,5 @@
 import { ErrorResponse } from '../models/error-response.model';
+import { ACCESS } from '../models/jwt-payload.model';
 import { Service } from '../models/service.model';
 import { DB } from './db';
 import crypto from 'crypto';
@@ -6,7 +7,7 @@ import crypto from 'crypto';
 export class ServicesDB {
   private static TABLE_NAME = 'services';
 
-  public static createService = async (name: string, access: string[]) =>
+  public static createService = async (name: string, access: ACCESS[]) =>
     DB.getInstance().setItemByKey<Service>(
       this.TABLE_NAME,
       {
