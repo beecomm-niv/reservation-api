@@ -2,7 +2,6 @@ import { Sync } from './sync.model';
 
 export interface OrderSummery {
   branchName: string;
-  clientName: string;
 
   table: number;
   dinners: number;
@@ -15,6 +14,7 @@ export interface Reservation {
   syncId: string;
   branchId: string;
   clientPhone: string;
+  clientName: string;
   ts: number;
 
   orderSummery?: OrderSummery;

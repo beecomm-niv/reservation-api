@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { reservationsRouter } from './sync.routes';
+import { reservationsRouter } from './reservations.routes';
 import { servicesRouter } from './services.routes';
 
 const router = Router();

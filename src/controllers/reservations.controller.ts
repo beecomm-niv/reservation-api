@@ -12,6 +12,16 @@ interface SetOrderBody {
   order: Order;
 }
 
+interface QueryByPhoneBody {
+  clientPhone: string;
+  branchId: string;
+  fetchFull: boolean;
+}
+
+interface QueryByBranch {
+  branchId: string;
+}
+
 export class ReservationsController {
   public static setReservation: ControllerHandler<null> = async (req, res) => {
     const body: Sync = req.body;
@@ -40,20 +50,28 @@ export class ReservationsController {
     res.send(ApiResponse.success(sync));
   };
 
-  public static queryReservations: ControllerHandler<Reservation[]> = async (req, res) => {
-    const { clientPhone, branchId, full } = req.query;
+  public static queryReservationsByClientPhone: ControllerHandler<Reservation[]> = async (req, res) => {
+    const body: QueryByPhoneBody = req.body;
 
-    if (!clientPhone) {
+    if (!body.clientPhone) {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    if (typeof clientPhone !== 'string') {
-      throw ErrorResponse.InvalidParams();
-    }
-
-    const data = await ReservationsDB.queryReservations(full === 'true', clientPhone, typeof branchId === 'string' ? branchId : undefined);
+    const data = await ReservationsDB.queryReservationsByClientPhone(body.fetchFull, body.clientPhone, body.branchId);
 
     res.send(ApiResponse.success(data));
+  };
+
+  public static queryReservationsByBranch: ControllerHandler<Reservation[]> = async (req, res) => {
+    const body: QueryByBranch = req.body;
+
+    if (!body.branchId) {
+      throw ErrorResponse.MissingRequiredParams();
+    }
+
+    const data = await ReservationsDB.queryReservationsByBranch(body.branchId);
+
+    return res.send(ApiResponse.success(data));
   };
 
   public static setOrderToReservation: ControllerHandler<null> = async (req, res) => {
