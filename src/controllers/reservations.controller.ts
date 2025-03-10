@@ -5,6 +5,7 @@ import { ErrorResponse } from '../models/error-response.model';
 import { Order } from '../models/order.model';
 import { Reservation } from '../models/reservation';
 import { Sync } from '../models/sync.model';
+import { AdapterService } from '../services/adapter.service';
 
 interface SetOrderBody {
   syncId: string;
@@ -33,6 +34,7 @@ export class ReservationsController {
     // TODO: for now we only handled seated reservations from external service host system. we handle all statuses once we have our host system.
     if (body.params.reservation.status === 'seated') {
       await ReservationsDB.setReservation(body, '');
+      await AdapterService.getInstance().sendReservation(body);
     }
 
     res.send(ApiResponse.success(null));

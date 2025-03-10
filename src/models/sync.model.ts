@@ -2,7 +2,6 @@ import { Order } from './order.model';
 
 export interface Sync {
   action: string;
-  restaurantId: string;
   branchId: string;
   params: Params;
 }

@@ -20,3 +20,14 @@ export interface Reservation {
   orderSummery?: OrderSummery;
   sync: Sync;
 }
+
+export interface ReservationDto {
+  branchId: string;
+  reservation: {
+    syncId: string;
+    clientPhone: string;
+    clientName: string;
+    tableNum: number;
+    dinners: number;
+  };
+}
