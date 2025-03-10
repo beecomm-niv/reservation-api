@@ -9,7 +9,7 @@ export class ServicesDB {
 
   public static createService = async (name: string, access: ACCESS[]) =>
     DB.getInstance().setItemByKey<Service>(
-      this.TABLE_NAME,
+      ServicesDB.TABLE_NAME,
       {
         name,
         access,
@@ -25,7 +25,7 @@ export class ServicesDB {
   public static findServiceByKeyAndSecret = async (accessKey: string, accessSecret: string): Promise<Service> => {
     const response = await DB.getInstance()
       .client.query({
-        TableName: this.TABLE_NAME,
+        TableName: ServicesDB.TABLE_NAME,
         IndexName: 'accessKeyId-accessSecretKey-index',
         KeyConditionExpression: 'accessKeyId = :k And accessSecretKey = :s',
         ExpressionAttributeValues: {

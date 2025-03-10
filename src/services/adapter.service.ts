@@ -9,6 +9,11 @@ interface AdapterResponse<T> {
   data: T;
 }
 
+interface SendReservationBody {
+  branchId: string;
+  reservation: ReservationDto;
+}
+
 export class AdapterService {
   private static instance: AdapterService;
 
@@ -32,7 +37,7 @@ export class AdapterService {
   };
 
   public sendReservation = async (sync: Sync) => {
-    const body: ReservationDto = {
+    const body: SendReservationBody = {
       branchId: sync.branchId,
       reservation: {
         clientName: sync.params.reservation.patron.name,
@@ -40,6 +45,7 @@ export class AdapterService {
         dinners: sync.params.reservation.size,
         syncId: sync.params.syncId,
         tableNum: +sync.params.reservation.table[0],
+        duration: sync.params.reservation.duration,
       },
     };
     const response = await this.client.post<AdapterResponse<boolean>>('/mobile/sync', body);

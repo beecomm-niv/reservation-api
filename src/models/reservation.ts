@@ -22,12 +22,10 @@ export interface Reservation {
 }
 
 export interface ReservationDto {
-  branchId: string;
-  reservation: {
-    syncId: string;
-    clientPhone: string;
-    clientName: string;
-    tableNum: number;
-    dinners: number;
-  };
+  syncId: string;
+  clientPhone: string;
+  clientName: string;
+  tableNum: number;
+  dinners: number;
+  duration: number;
 }

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { Sync } from '../models/sync.model';
 import { DB } from './db';
-import { OrderSummery, Reservation } from '../models/reservation';
+import { OrderSummery, Reservation, ReservationDto } from '../models/reservation';
 
 export class ReservationsDB {
   private static TABLE_NAME = 'reservations';
@@ -28,21 +28,20 @@ export class ReservationsDB {
   };
 
   public static setReservation = async (sync: Sync, branchName: string) => {
-    // TODO: set branchId to beecommBranch
     const reservation: Reservation = {
       syncId: sync.params.syncId,
       branchId: sync.branchId,
-      clientPhone: sync.params.reservation.patron.phone.replace('+', ''),
+      clientPhone: sync.params.reservation.patron.phone,
       clientName: sync.params.reservation.patron.name,
       orderSummery: this.getOrderSummeryFromSync(sync, branchName),
       ts: dayjs(sync.params.syncAt).valueOf(),
       sync,
     };
 
-    await DB.getInstance().setItemByKey(this.TABLE_NAME, reservation);
+    await DB.getInstance().setItemByKey(ReservationsDB.TABLE_NAME, reservation);
   };
 
-  public static getReservation = async (syncId: string) => await DB.getInstance().findItemByKey<Reservation>(this.TABLE_NAME, { syncId });
+  public static getReservation = async (syncId: string) => await DB.getInstance().findItemByKey<Reservation>(ReservationsDB.TABLE_NAME, { syncId });
 
   public static queryReservationsByClientPhone = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Reservation[]> => {
     const condition = 'clientPhone = :phone' + (branchId ? ' And branchId = :branch' : '');
@@ -58,7 +57,7 @@ export class ReservationsDB {
 
     const response = await DB.getInstance()
       .client.query({
-        TableName: this.TABLE_NAME,
+        TableName: ReservationsDB.TABLE_NAME,
         IndexName: 'findReservationsByClientPhone',
         KeyConditionExpression: condition,
         ExpressionAttributeValues: values,
@@ -72,7 +71,7 @@ export class ReservationsDB {
   public static queryReservationsByBranch = async (branchId: string): Promise<Reservation[]> => {
     const response = await DB.getInstance()
       .client.query({
-        TableName: this.TABLE_NAME,
+        TableName: ReservationsDB.TABLE_NAME,
         IndexName: 'findReservationsByDate', // findReservationsByBranch
         KeyConditionExpression: 'branchId = :branch',
         ExpressionAttributeValues: {
@@ -82,5 +81,70 @@ export class ReservationsDB {
       .promise();
 
     return (response.Items || []) as Reservation[];
+  };
+
+  private static dtoToReservations = (branchId: string, posReservations: ReservationDto[]) => {
+    const now = dayjs();
+    const date = now.utc().local().format();
+
+    return posReservations.map<Reservation>((r) => {
+      const etc = now.add(r.duration, 'minutes');
+
+      return {
+        branchId,
+        clientName: r.clientName,
+        clientPhone: r.clientPhone,
+        syncId: r.syncId,
+        ts: now.valueOf(),
+        sync: {
+          action: 'object_sync',
+          branchId,
+          params: {
+            syncId: r.syncId,
+            syncAt: date,
+            reservation: {
+              comment: '',
+              createdAt: date,
+              createdBy: 'ניב כץ', //TODO: weitress name !
+              creditcardStatus: '',
+              duration: r.duration,
+              expectedDate: etc.format('YYYYMMDD'),
+              expectedTime: etc.format('HHmm'),
+              hasPackage: false,
+              lastModified: now.valueOf(),
+              patron: {
+                name: r.clientName,
+                phone: r.clientName,
+                note: '',
+                status: '',
+              },
+              reservationId: r.syncId,
+              size: r.dinners,
+              stage: '',
+              status: 'seated',
+              table: [r.tableNum.toString()],
+            },
+          },
+        },
+      };
+    });
+  };
+
+  public static setReservationsFromPos = async (branchId: string, posReservations: ReservationDto[]) => {
+    const reservations = this.dtoToReservations(branchId, posReservations);
+
+    await DB.getInstance()
+      .client.batchWrite({
+        RequestItems: {
+          [ReservationsDB.TABLE_NAME]: reservations.map((r) => ({
+            PutRequest: {
+              Item: r,
+            },
+          })),
+        },
+      })
+      .promise();
+
+    return reservations;
   };
 }

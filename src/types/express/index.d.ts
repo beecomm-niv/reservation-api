@@ -4,7 +4,7 @@ import { JwtPayload } from '../../models/jwt-payload.model';
 declare global {
   namespace Express {
     interface Request {
-      user: JwtPayload;
+      user?: JwtPayload;
     }
   }
 }

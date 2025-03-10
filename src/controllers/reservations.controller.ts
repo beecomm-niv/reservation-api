@@ -3,7 +3,7 @@ import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
 import { Order } from '../models/order.model';
-import { Reservation } from '../models/reservation';
+import { Reservation, ReservationDto } from '../models/reservation';
 import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
 
@@ -21,6 +21,12 @@ interface QueryByPhoneBody {
 
 interface QueryByBranch {
   branchId: string;
+}
+
+interface SetPosReservationsBody {
+  branchId: string;
+  externalBranchId: string;
+  reservations?: ReservationDto[];
 }
 
 export class ReservationsController {
@@ -76,21 +82,15 @@ export class ReservationsController {
     return res.send(ApiResponse.success(data));
   };
 
-  public static setOrderToReservation: ControllerHandler<null> = async (req, res) => {
-    const body: SetOrderBody = req.body;
+  public static setPosReservations: ControllerHandler<null> = async (req, res) => {
+    const body: SetPosReservationsBody = req.body;
 
-    if (!body.syncId || !body.branchName || !body.order) {
-      throw ErrorResponse.MissingRequiredParams();
+    if (!body.branchId || !body.reservations?.length || !body.externalBranchId) {
+      throw ErrorResponse.InvalidParams();
     }
 
-    const reservation = await ReservationsDB.getReservation(body.syncId);
-
-    const sync: Sync = { ...reservation.sync };
-    sync.params.order = body.order;
-
-    await ReservationsDB.setReservation(sync, body.branchName);
-
-    // TODO: send reservation to hosting service
+    await ReservationsDB.setReservationsFromPos(body.branchId, body.reservations);
+    // TODO: send to external host service this new reservations
 
     res.send(ApiResponse.success(null));
   };
