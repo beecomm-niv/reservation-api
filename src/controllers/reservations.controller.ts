@@ -7,21 +7,20 @@ import { Reservation, ReservationDto } from '../models/reservation';
 import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
 
-interface SetOrderBody {
-  syncId: string;
+interface MergeOrdersToReservationBody {
   branchName: string;
-  order: Order;
+  orders?: Order[];
 }
 
-interface QueryByPhoneBody {
-  clientPhone: string;
-  branchId: string;
-  fetchFull: boolean;
-}
+// interface QueryByPhoneBody {
+//   clientPhone: string;
+//   branchId: string;
+//   fetchFull: boolean;
+// }
 
-interface QueryByBranch {
-  branchId: string;
-}
+// interface QueryByBranch {
+//   branchId: string;
+// }
 
 interface SetPosReservationsBody {
   branchId: string;
@@ -58,29 +57,29 @@ export class ReservationsController {
     res.send(ApiResponse.success(sync));
   };
 
-  public static queryReservationsByClientPhone: ControllerHandler<Reservation[]> = async (req, res) => {
-    const body: QueryByPhoneBody = req.body;
+  // public static queryReservationsByClientPhone: ControllerHandler<Reservation[]> = async (req, res) => {
+  //   const body: QueryByPhoneBody = req.body;
 
-    if (!body.clientPhone) {
-      throw ErrorResponse.MissingRequiredParams();
-    }
+  //   if (!body.clientPhone) {
+  //     throw ErrorResponse.MissingRequiredParams();
+  //   }
 
-    const data = await ReservationsDB.queryReservationsByClientPhone(body.fetchFull, body.clientPhone, body.branchId);
+  //   const data = await ReservationsDB.queryReservationsByClientPhone(body.fetchFull, body.clientPhone, body.branchId);
 
-    res.send(ApiResponse.success(data));
-  };
+  //   res.send(ApiResponse.success(data));
+  // };
 
-  public static queryReservationsByBranch: ControllerHandler<Reservation[]> = async (req, res) => {
-    const body: QueryByBranch = req.body;
+  // public static queryReservationsByBranch: ControllerHandler<Reservation[]> = async (req, res) => {
+  //   const body: QueryByBranch = req.body;
 
-    if (!body.branchId) {
-      throw ErrorResponse.MissingRequiredParams();
-    }
+  //   if (!body.branchId) {
+  //     throw ErrorResponse.MissingRequiredParams();
+  //   }
 
-    const data = await ReservationsDB.queryReservationsByBranch(body.branchId);
+  //   const data = await ReservationsDB.queryReservationsByBranch(body.branchId);
 
-    return res.send(ApiResponse.success(data));
-  };
+  //   return res.send(ApiResponse.success(data));
+  // };
 
   public static setPosReservations: ControllerHandler<null> = async (req, res) => {
     const body: SetPosReservationsBody = req.body;
@@ -91,6 +90,19 @@ export class ReservationsController {
 
     await ReservationsDB.setReservationsFromPos(body.branchId, body.reservations);
     // TODO: send to external host service this new reservations
+
+    res.send(ApiResponse.success(null));
+  };
+
+  public static mergeOrdersToReservations: ControllerHandler<null> = async (req, res) => {
+    const body: MergeOrdersToReservationBody = req.body;
+
+    if (!body.branchName || !body.orders?.length) {
+      throw ErrorResponse.InvalidParams();
+    }
+
+    const result = await ReservationsDB.mergeOrdersToReservations(body.branchName, body.orders);
+    // TODO: update external reservation serivce with the new sync inculde the pos order.
 
     res.send(ApiResponse.success(null));
   };

@@ -48,8 +48,7 @@ export class AdapterService {
         duration: sync.params.reservation.duration,
       },
     };
-    const response = await this.client.post<AdapterResponse<boolean>>('/mobile/sync', body);
 
-    console.log(response.data);
+    await this.client.post<AdapterResponse<boolean>>('/mobile/sync', body);
   };
 }
