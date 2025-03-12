@@ -1,4 +1,4 @@
-import { config, DynamoDB } from 'aws-sdk';
+import { DynamoDB } from 'aws-sdk';
 import { ErrorResponse } from '../models/error-response.model';
 
 interface InsertOptions {
@@ -12,12 +12,6 @@ export class DB {
   public client: DynamoDB.DocumentClient;
 
   constructor() {
-    config.update({
-      region: 'il-central-1',
-      accessKeyId: process.env.AWS_ACCESS_KEY,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    });
-
     this.client = new DynamoDB.DocumentClient();
   }
 

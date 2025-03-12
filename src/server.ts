@@ -1,3 +1,5 @@
+import './database-init';
+
 import { Express } from 'express';
 import { ErrorController } from './controllers/error-handler.controller';
 import { appRouter } from './routes';
@@ -12,7 +14,7 @@ const run = (app: Express) => {
   app.use(cors());
   app.use(bodyParser.json());
 
-  // TODO: check that its not pring logs on production !
+  // TODO: check that its not print logs on production !
   if (process.env.NODE_ENV === 'DEV') {
     app.use(morgan('dev'));
   }
