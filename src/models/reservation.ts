@@ -28,4 +28,7 @@ export interface ReservationDto {
   tableNum: number;
   dinners: number;
   duration: number;
+
+  orderId?: number;
+  isNew?: boolean;
 }

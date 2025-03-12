@@ -6,6 +6,7 @@ import { Order } from '../models/order.model';
 import { Reservation, ReservationDto } from '../models/reservation';
 import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
+import { RealTimeService } from '../services/realtime.service';
 
 interface MergeOrdersToReservationBody {
   branchName: string;
@@ -26,6 +27,8 @@ interface SetPosReservationsBody {
   branchId: string;
   externalBranchId: string;
   reservations?: ReservationDto[];
+  removed?: number[];
+  init?: boolean;
 }
 
 export class ReservationsController {
@@ -84,12 +87,20 @@ export class ReservationsController {
   public static setPosReservations: ControllerHandler<null> = async (req, res) => {
     const body: SetPosReservationsBody = req.body;
 
-    if (!body.branchId || !body.reservations?.length || !body.externalBranchId) {
+    if (!body.branchId || !body.reservations || !body.externalBranchId || !body.removed) {
       throw ErrorResponse.InvalidParams();
     }
 
-    await ReservationsDB.setReservationsFromPos(body.branchId, body.reservations);
-    // TODO: send to external host service this new reservations
+    const newReservations = body.reservations.filter((r) => r.isNew);
+
+    if (newReservations.length) {
+      await ReservationsDB.setReservationsFromPos(body.branchId, body.reservations);
+      // TODO: send to external host service this new reservations
+    }
+
+    if (body.reservations.length || body.removed.length || body.init) {
+      await RealTimeService.setReservations(body.branchId, body.reservations, body.removed, !!body.init);
+    }
 
     res.send(ApiResponse.success(null));
   };
