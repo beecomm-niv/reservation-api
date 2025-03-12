@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { UsersDB } from '../db/users.db';
 import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
@@ -11,12 +12,16 @@ interface EmailAndPassword {
 }
 
 export class UsersController {
-  private static getTokenFromUser = (user: User) =>
-    JwtService.sign({
+  private static setTokenInHeader = (user: User, res: Response) => {
+    const token = JwtService.sign({
       access: ['*'],
       id: user.userId,
       role: user.role,
     });
+
+    res.setHeader('x-auth-token', token);
+    res.setHeader('Access-Control-Expose-Headers', 'x-auth-token');
+  };
 
   public static createUser: ControllerHandler<User> = async (req, res) => {
     const body: EmailAndPassword = req.body;
@@ -26,7 +31,6 @@ export class UsersController {
     }
 
     const user = await UsersDB.createUser(body.email, body.password);
-    res.setHeader('x-auth-token', this.getTokenFromUser(user));
 
     res.send(ApiResponse.success(user));
   };
@@ -39,12 +43,12 @@ export class UsersController {
     }
 
     const user = await UsersDB.getUserByEmailAndPassword(body.email, body.password);
-    res.setHeader('x-auth-token', this.getTokenFromUser(user));
+    this.setTokenInHeader(user, res);
 
     res.send(ApiResponse.success(user));
   };
 
-  public static getTokenFromToken: ControllerHandler<User> = async (req, res) => {
+  public static getUserFromToken: ControllerHandler<User> = async (req, res) => {
     const userId = req.user?.id;
 
     if (!userId) {

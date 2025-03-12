@@ -8,6 +8,6 @@ router.post('/', UsersController.createUser);
 
 router.post('/login', UsersController.getUserByEmailAndPassword);
 
-router.get('/refresh', AuthController.verify('user', false), UsersController.getTokenFromToken);
+router.get('/refresh', AuthController.verify('user', false), UsersController.getUserFromToken);
 
 export const usersRouter = router;
