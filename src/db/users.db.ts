@@ -7,8 +7,8 @@ import { subtle } from 'crypto';
 export class UsersDB {
   private static readonly TABLE_NAME = 'users';
 
-  private static sha256 = async (value: string) => {
-    const hashBuffer = await subtle.digest('SHA-256', Buffer.from(value));
+  private static digest = async (value: string, type: 'SHA-256' | 'SHA-1') => {
+    const hashBuffer = await subtle.digest(type, Buffer.from(value));
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
   };
@@ -20,14 +20,16 @@ export class UsersDB {
     return user;
   };
 
-  public static createUser = async (email: string, password: string): Promise<User> => {
-    const userId = await UsersDB.sha256(email);
-    const hashPassword = await UsersDB.sha256(password);
+  public static createUser = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
+    const email = requestedEmail.toLowerCase();
+
+    const userId = await UsersDB.digest(email, 'SHA-1');
+    const password = await UsersDB.digest(requestedPassword, 'SHA-256');
 
     const user: User = {
       userId,
-      email: email.toLowerCase(),
-      password: hashPassword,
+      email,
+      password,
       beeBranchId: '',
       hostBranchId: '',
       role: 'user',
@@ -47,8 +49,9 @@ export class UsersDB {
     return user;
   };
 
-  public static getUserByEmailAndPassword = async (email: string, password: string): Promise<User> => {
-    const hashPassword = await UsersDB.sha256(password);
+  public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
+    const email = requestedEmail.toLowerCase();
+    const password = await UsersDB.digest(requestedPassword, 'SHA-256');
 
     const response = await DB.getInstance()
       .client.query({
@@ -56,8 +59,8 @@ export class UsersDB {
         IndexName: 'email-password-index',
         KeyConditionExpression: 'email = :e And password = :p',
         ExpressionAttributeValues: {
-          ':e': email.toLowerCase(),
-          ':p': hashPassword,
+          ':e': email,
+          ':p': password,
         },
       })
       .promise();
