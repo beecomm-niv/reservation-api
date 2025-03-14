@@ -2,16 +2,11 @@ import { ErrorResponse } from '../models/error-response.model';
 import { User, UserDto } from '../models/user.model';
 import { DB } from './db';
 
-import { subtle } from 'crypto';
+import crypto from 'crypto';
+import bycrypt from 'bcryptjs';
 
 export class UsersDB {
   private static readonly TABLE_NAME = 'users';
-
-  private static digest = async (value: string, type: 'SHA-256' | 'SHA-1') => {
-    const hashBuffer = await subtle.digest(type, Buffer.from(value));
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
-  };
 
   private static userToDto = (user: User): UserDto => ({
     branch: null, // TODO
@@ -30,8 +25,8 @@ export class UsersDB {
   public static createUser = async (requestedEmail: string, requestedPassword: string, name: string): Promise<UserDto> => {
     const email = requestedEmail.toLowerCase();
 
-    const userId = await UsersDB.digest(email, 'SHA-1');
-    const password = await UsersDB.digest(requestedPassword, 'SHA-256');
+    const userId = crypto.createHash('sha1').update(email).digest('hex');
+    const password = await bycrypt.hash(requestedPassword, 10);
 
     const user: User = {
       userId,
@@ -56,16 +51,14 @@ export class UsersDB {
 
   public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<UserDto> => {
     const email = requestedEmail.toLowerCase();
-    const password = await UsersDB.digest(requestedPassword, 'SHA-256');
 
     const response = await DB.getInstance()
       .client.query({
         TableName: UsersDB.TABLE_NAME,
-        IndexName: 'email-password-index',
-        KeyConditionExpression: 'email = :e And password = :p',
+        IndexName: 'email-index',
+        KeyConditionExpression: 'email = :e',
         ExpressionAttributeValues: {
           ':e': email,
-          ':p': password,
         },
       })
       .promise();
@@ -75,6 +68,11 @@ export class UsersDB {
     }
 
     const user = response.Items[0] as User;
+
+    const isPasswordMatch = await bycrypt.compare(requestedPassword, user.password);
+    if (!isPasswordMatch) {
+      throw ErrorResponse.BadEmailOrPassword();
+    }
 
     return this.userToDto(user);
   };
