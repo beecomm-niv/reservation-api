@@ -3,16 +3,17 @@ import { UsersDB } from '../db/users.db';
 import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
-import { User } from '../models/user.model';
+import { User, UserDto } from '../models/user.model';
 import { JwtService } from '../services/jwt.service';
 
 interface EmailAndPassword {
   email?: string;
   password?: string;
+  name?: string;
 }
 
 export class UsersController {
-  private static setTokenInHeader = (user: User, res: Response) => {
+  private static setTokenInHeader = (user: UserDto, res: Response) => {
     const token = JwtService.sign({
       access: ['*'],
       id: user.userId,
@@ -23,19 +24,19 @@ export class UsersController {
     res.setHeader('Access-Control-Expose-Headers', 'x-auth-token');
   };
 
-  public static createUser: ControllerHandler<User> = async (req, res) => {
-    const body: EmailAndPassword = req.body;
+  public static createUser: ControllerHandler<UserDto> = async (req, res) => {
+    const { email, name, password }: EmailAndPassword = req.body;
 
-    if (!body.email || !body.password) {
+    if (!email || !password || !name) {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    const user = await UsersDB.createUser(body.email, body.password);
+    const user = await UsersDB.createUser(email, password, name);
 
     res.send(ApiResponse.success(user));
   };
 
-  public static getUserByEmailAndPassword: ControllerHandler<User> = async (req, res) => {
+  public static getUserByEmailAndPassword: ControllerHandler<UserDto> = async (req, res) => {
     const body: EmailAndPassword = req.body;
 
     if (!body.email || !body.password) {
@@ -48,7 +49,7 @@ export class UsersController {
     res.send(ApiResponse.success(user));
   };
 
-  public static getUserFromToken: ControllerHandler<User> = async (req, res) => {
+  public static getUserFromToken: ControllerHandler<UserDto> = async (req, res) => {
     const userId = req.user?.id;
 
     if (!userId) {

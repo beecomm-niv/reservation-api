@@ -1,5 +1,5 @@
 import { ErrorResponse } from '../models/error-response.model';
-import { User } from '../models/user.model';
+import { User, UserDto } from '../models/user.model';
 import { DB } from './db';
 
 import { subtle } from 'crypto';
@@ -13,14 +13,21 @@ export class UsersDB {
     return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
   };
 
-  public static getUserById = async (userId: string) => {
-    const user = await DB.getInstance().findItemByKey<User>(UsersDB.TABLE_NAME, { userId });
-    delete user.password;
+  private static userToDto = (user: User): UserDto => ({
+    branch: null, // TODO
+    email: user.email,
+    role: user.role,
+    userId: user.userId,
+    name: user.name,
+  });
 
-    return user;
+  public static getUserById = async (userId: string): Promise<UserDto> => {
+    const user = await DB.getInstance().findItemByKey<User>(UsersDB.TABLE_NAME, { userId });
+
+    return this.userToDto(user);
   };
 
-  public static createUser = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
+  public static createUser = async (requestedEmail: string, requestedPassword: string, name: string): Promise<UserDto> => {
     const email = requestedEmail.toLowerCase();
 
     const userId = await UsersDB.digest(email, 'SHA-1');
@@ -30,8 +37,8 @@ export class UsersDB {
       userId,
       email,
       password,
-      beeBranchId: '',
-      hostBranchId: '',
+      name,
+      branchId: '',
       role: 'user',
     };
 
@@ -44,12 +51,10 @@ export class UsersDB {
       throw ErrorResponse.EmailAlradyExist();
     }
 
-    delete user.password;
-
-    return user;
+    return this.userToDto(user);
   };
 
-  public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
+  public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<UserDto> => {
     const email = requestedEmail.toLowerCase();
     const password = await UsersDB.digest(requestedPassword, 'SHA-256');
 
@@ -70,8 +75,7 @@ export class UsersDB {
     }
 
     const user = response.Items[0] as User;
-    delete user.password;
 
-    return user;
+    return this.userToDto(user);
   };
 }
