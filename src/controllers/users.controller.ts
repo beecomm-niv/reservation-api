@@ -5,6 +5,8 @@ import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
 import { User, UserDto } from '../models/user.model';
 import { JwtService } from '../services/jwt.service';
+import { Branch } from '../models/branch.model';
+import { BranchesDB } from '../db/branches.db';
 
 interface EmailAndPassword {
   email?: string;
@@ -13,15 +15,33 @@ interface EmailAndPassword {
 }
 
 export class UsersController {
-  private static setTokenInHeader = (user: UserDto, res: Response) => {
+  private static getBranchByUser = async (user: User): Promise<Branch | null> => {
+    if (user.role !== 'user' || !user.branchId) {
+      return null;
+    }
+
+    return await BranchesDB.getBranchOrNull(user.branchId);
+  };
+
+  private static userToDto = (user: User, branch: Branch | null): UserDto => ({
+    branch,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    userId: user.userId,
+  });
+
+  private static setTokenInHeader = (user: User, res: Response) => {
     const token = JwtService.sign({
       access: ['*'],
       id: user.userId,
       role: user.role,
     });
 
-    res.setHeader('x-auth-token', token);
-    res.setHeader('Access-Control-Expose-Headers', 'x-auth-token');
+    const HEADER_NAME = 'x-auth-token';
+
+    res.setHeader(HEADER_NAME, token);
+    res.setHeader('Access-Control-Expose-Headers', HEADER_NAME);
   };
 
   public static createUser: ControllerHandler<UserDto> = async (req, res) => {
@@ -33,7 +53,7 @@ export class UsersController {
 
     const user = await UsersDB.createUser(email, password, name);
 
-    res.send(ApiResponse.success(user));
+    res.send(ApiResponse.success(this.userToDto(user, null)));
   };
 
   public static getUserByEmailAndPassword: ControllerHandler<UserDto> = async (req, res) => {
@@ -44,9 +64,11 @@ export class UsersController {
     }
 
     const user = await UsersDB.getUserByEmailAndPassword(body.email, body.password);
+    const branch = await this.getBranchByUser(user);
+
     this.setTokenInHeader(user, res);
 
-    res.send(ApiResponse.success(user));
+    res.send(ApiResponse.success(this.userToDto(user, branch)));
   };
 
   public static getUserFromToken: ControllerHandler<UserDto> = async (req, res) => {
@@ -57,7 +79,8 @@ export class UsersController {
     }
 
     const user = await UsersDB.getUserById(userId);
+    const branch = await this.getBranchByUser(user);
 
-    res.send(ApiResponse.success(user));
+    res.send(ApiResponse.success(this.userToDto(user, branch)));
   };
 }

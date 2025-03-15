@@ -1,5 +1,5 @@
 import { ErrorResponse } from '../models/error-response.model';
-import { User, UserDto } from '../models/user.model';
+import { User } from '../models/user.model';
 import { DB } from './db';
 
 import crypto from 'crypto';
@@ -8,21 +8,13 @@ import bycrypt from 'bcryptjs';
 export class UsersDB {
   private static readonly TABLE_NAME = 'users';
 
-  private static userToDto = (user: User): UserDto => ({
-    branch: null, // TODO
-    email: user.email,
-    role: user.role,
-    userId: user.userId,
-    name: user.name,
-  });
-
-  public static getUserById = async (userId: string): Promise<UserDto> => {
+  public static getUserById = async (userId: string): Promise<User> => {
     const user = await DB.getInstance().findItemByKey<User>(UsersDB.TABLE_NAME, { userId });
 
-    return this.userToDto(user);
+    return user;
   };
 
-  public static createUser = async (requestedEmail: string, requestedPassword: string, name: string): Promise<UserDto> => {
+  public static createUser = async (requestedEmail: string, requestedPassword: string, name: string): Promise<User> => {
     const email = requestedEmail.toLowerCase();
 
     const userId = crypto.createHash('sha1').update(email).digest('hex');
@@ -46,10 +38,10 @@ export class UsersDB {
       throw ErrorResponse.EmailAlradyExist();
     }
 
-    return this.userToDto(user);
+    return user;
   };
 
-  public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<UserDto> => {
+  public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
     const email = requestedEmail.toLowerCase();
 
     const response = await DB.getInstance()
@@ -74,6 +66,6 @@ export class UsersDB {
       throw ErrorResponse.BadEmailOrPassword();
     }
 
-    return this.userToDto(user);
+    return user;
   };
 }
