@@ -22,4 +22,16 @@ export class BranchesController {
 
     res.send(ApiResponse.success(result));
   };
+
+  public static getBranchById: ControllerHandler<Branch> = async (req, res) => {
+    const id = req.params.id;
+
+    if (!id) {
+      throw ErrorResponse.MissingRequiredParams();
+    }
+
+    const branch = await BranchesDB.getBranchById(id);
+
+    res.send(ApiResponse.success(branch));
+  };
 }
