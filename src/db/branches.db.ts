@@ -23,12 +23,4 @@ export class BranchesDB {
   };
 
   public static getBranchById = async (branchId: string) => await DB.getInstance().findItemByKey<Branch>(this.TABLE_NAME, { branchId });
-
-  public static getBranchOrNull = async (branchId: string): Promise<Branch | null> => {
-    try {
-      return await this.getBranchById(branchId);
-    } catch {
-      return null;
-    }
-  };
 }

@@ -16,11 +16,15 @@ interface EmailAndPassword {
 
 export class UsersController {
   private static getBranchByUser = async (user: User): Promise<Branch | null> => {
-    if (user.role !== 'user' || !user.branchId) {
-      return null;
-    }
+    let branch: Branch | null = null;
 
-    return await BranchesDB.getBranchOrNull(user.branchId);
+    try {
+      if (user.role === 'user' && user.branchId) {
+        branch = await BranchesDB.getBranchById(user.branchId);
+      }
+    } catch {}
+
+    return branch;
   };
 
   private static userToDto = (user: User, branch: Branch | null): UserDto => ({
