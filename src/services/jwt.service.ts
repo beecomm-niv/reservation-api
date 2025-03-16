@@ -13,7 +13,9 @@ export class JwtService {
     return jwt.sign(payload, this.SECRET);
   };
 
-  public static verify = (token: string): JwtPayload | null => {
+  public static verify = (token?: string): JwtPayload | null => {
+    if (!token) return null;
+
     try {
       if (!this.SECRET) {
         throw ErrorResponse.AuthorizationError();

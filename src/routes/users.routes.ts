@@ -4,7 +4,7 @@ import { AuthController } from '../controllers/auth.controller';
 
 const router = Router();
 
-router.post('/', UsersController.createUser);
+router.post('/', AuthController.verify('super_admin', false), UsersController.createUser);
 
 router.post('/login', UsersController.getUserByEmailAndPassword);
 

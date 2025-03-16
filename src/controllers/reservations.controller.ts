@@ -43,6 +43,10 @@ export class ReservationsController {
     if (body.params.reservation.status === 'seated') {
       await ReservationsDB.setReservation(body, '');
       await AdapterService.getInstance().sendReservation(body);
+
+      if (req.user?.role === 'user') {
+        // TODO: update external reservations service.
+      }
     }
 
     res.send(ApiResponse.success(null));

@@ -3,6 +3,11 @@ import { ErrorResponse } from '../models/error-response.model';
 import { ACCESS, JwtPayload, USER_ROLE } from '../models/jwt-payload.model';
 import { JwtService } from '../services/jwt.service';
 
+type VerifyMiddleware = {
+  (role: USER_ROLE, withServiceAccess: true, access: ACCESS): ControllerHandler<null>;
+  (role: USER_ROLE, withServiceAccess: false): ControllerHandler<null>;
+};
+
 export class AuthController {
   private static USER_POWER: Record<USER_ROLE, number> = {
     service: 10,
@@ -11,25 +16,18 @@ export class AuthController {
     super_admin: 40,
   };
 
-  public static verify: {
-    (role: USER_ROLE, withServiceAccess: true, access: ACCESS): ControllerHandler<null>;
-    (role: USER_ROLE, withServiceAccess: false): ControllerHandler<null>;
-  } = (role: USER_ROLE, withServiceAccess: boolean, access?: ACCESS) => async (req, res, next) => {
+  public static verify: VerifyMiddleware = (role: USER_ROLE, withServiceAccess: boolean, access?: ACCESS) => async (req, _, next) => {
     const token = req.header('Authorization')?.replace('Bearer ', '');
-    const payload = JwtService.verify(token || '');
+    const payload = JwtService.verify(token);
 
-    if (!payload) {
-      throw ErrorResponse.AccessDenied();
-    }
-
-    const hasAccess = this.isHaveAccess(payload, role, withServiceAccess, access);
-
-    if (hasAccess) {
+    if (payload && this.isHaveAccess(payload, role, withServiceAccess, access)) {
       req.user = payload;
       next();
-    } else {
-      throw ErrorResponse.AccessDenied();
+
+      return;
     }
+
+    throw ErrorResponse.AccessDenied();
   };
 
   private static isHaveAccess = (user: JwtPayload, role: USER_ROLE, withServiceAccess: boolean, access?: ACCESS): boolean => {
