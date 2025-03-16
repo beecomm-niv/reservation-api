@@ -23,4 +23,15 @@ export class BranchesDB {
   };
 
   public static getBranchById = async (branchId: string) => await DB.getInstance().findItemByKey<Branch>(this.TABLE_NAME, { branchId });
+
+  public static updateBranch = async (branch: Partial<Branch>) => {
+    DB.getInstance().update(this.TABLE_NAME, { branchId: branch.branchId }, [
+      { alias: ':p', expression: 'posBranchId', value: branch.posBranchId },
+      {
+        alias: ':r',
+        expression: 'reservationsBranchId',
+        value: branch.reservationsBranchId,
+      },
+    ]);
+  };
 }

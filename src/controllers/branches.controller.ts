@@ -34,4 +34,16 @@ export class BranchesController {
 
     res.send(ApiResponse.success(branch));
   };
+
+  public static updateBranch: ControllerHandler<null> = async (req, res) => {
+    const body: Partial<Branch> = req.body;
+
+    if (!body.branchId) {
+      throw ErrorResponse.MissingRequiredParams();
+    }
+
+    await BranchesDB.updateBranch(body);
+
+    res.send(ApiResponse.success(null));
+  };
 }

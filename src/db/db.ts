@@ -1,6 +1,12 @@
 import { DynamoDB } from 'aws-sdk';
 import { ErrorResponse } from '../models/error-response.model';
 
+interface UpdateExpression {
+  expression: string;
+  alias: string;
+  value?: any;
+}
+
 interface InsertOptions {
   primaryKey: string;
   deniedOverride: boolean;
@@ -52,5 +58,27 @@ export class DB {
     }
 
     return response.Item as T;
+  };
+
+  public update = async (tableName: string, key: DynamoDB.DocumentClient.Key, expressions: UpdateExpression[]) => {
+    const values = expressions.filter((v) => !!v.value);
+
+    if (!values.length) {
+      throw ErrorResponse.InvalidUpdateExpression();
+    }
+
+    const setExpression = values.map((v) => `#${v.expression} = ${v.alias}`).join(', ');
+    const namesExpression = Object.assign({}, ...values.map((v) => ({ [`#${v.expression}`]: v.expression })));
+    const valuesExpression = Object.assign({}, ...values.map((v) => ({ [v.alias]: v.value })));
+
+    await this.client
+      .update({
+        Key: key,
+        TableName: tableName,
+        UpdateExpression: `set ${setExpression}`,
+        ExpressionAttributeNames: namesExpression,
+        ExpressionAttributeValues: valuesExpression,
+      })
+      .promise();
   };
 }
