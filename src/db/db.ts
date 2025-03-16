@@ -7,8 +7,8 @@ interface Expressions<T> {
   value?: any;
 }
 
-interface InsertOptions {
-  primaryKey: string;
+interface InsertOptions<T> {
+  primaryKey: keyof T;
   deniedOverride: boolean;
 }
 
@@ -29,11 +29,11 @@ export class DB {
     return this.instance;
   };
 
-  public setItemByKey = async <T>(tableName: string, item: T, options?: InsertOptions) => {
+  public setItemByKey = async <T>(tableName: string, item: T, options?: InsertOptions<T>) => {
     const deniedOverride = options?.deniedOverride && options.primaryKey;
 
-    const condition = deniedOverride ? `attribute_not_exists(#${options.primaryKey})` : undefined;
-    const alias = deniedOverride ? { [`#${options.primaryKey}`]: options?.primaryKey } : undefined;
+    const condition = deniedOverride ? `attribute_not_exists(#${options.primaryKey.toString()})` : undefined;
+    const alias = deniedOverride ? { [`#${options.primaryKey.toString()}`]: options?.primaryKey.toString() } : undefined;
 
     await this.client
       .put({
