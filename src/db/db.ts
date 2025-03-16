@@ -1,8 +1,8 @@
 import { DynamoDB } from 'aws-sdk';
 import { ErrorResponse } from '../models/error-response.model';
 
-interface Expressions {
-  expression: string;
+interface Expressions<T> {
+  expression: keyof T;
   alias: string;
   value?: any;
 }
@@ -60,7 +60,7 @@ export class DB {
     return response.Item as T;
   };
 
-  private getNameAndValuesExpressions = (expressions: Expressions[], join: string) => {
+  private getNameAndValuesExpressions = <T>(expressions: Expressions<T>[], join: string) => {
     const validExpressions = expressions.filter((v) => !!v.value);
 
     if (!validExpressions) {
@@ -68,27 +68,28 @@ export class DB {
     }
 
     return {
-      expressionString: validExpressions.map((v) => `#${v.expression} = ${v.alias}`).join(join),
-      names: Object.assign({}, ...validExpressions.map((v) => ({ [`#${v.expression}`]: v.expression }))),
+      expressionString: validExpressions.map((v) => `#${v.expression.toString()} = ${v.alias}`).join(join),
+      names: Object.assign({}, ...validExpressions.map((v) => ({ [`#${v.expression.toString()}`]: v.expression }))),
       values: Object.assign({}, ...validExpressions.map((v) => ({ [v.alias]: v.value }))),
     };
   };
 
-  public update = async (tableName: string, key: DynamoDB.DocumentClient.Key, expressions: Expressions[]) => {
+  public update = async <T>(tableName: string, primaryKey: keyof T, primaryKeyValue: string, expressions: Expressions<T>[]) => {
     const { names, values, expressionString } = this.getNameAndValuesExpressions(expressions, ', ');
 
     await this.client
       .update({
-        Key: key,
+        Key: { [primaryKey]: primaryKeyValue },
         TableName: tableName,
         UpdateExpression: `set ${expressionString}`,
         ExpressionAttributeNames: names,
         ExpressionAttributeValues: values,
+        ConditionExpression: `attribute_exists(${primaryKey.toString()})`,
       })
       .promise();
   };
 
-  public query = async (tableName: string, indexName: string, expressions: Expressions[]) => {
+  public query = async <T>(tableName: string, indexName: string, expressions: Expressions<T>[]) => {
     const { names, expressionString, values } = this.getNameAndValuesExpressions(expressions, ' AND ');
 
     return await this.client

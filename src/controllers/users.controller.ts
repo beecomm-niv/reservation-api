@@ -87,4 +87,16 @@ export class UsersController {
 
     res.send(ApiResponse.success(this.userToDto(user, branch)));
   };
+
+  public static updateUser: ControllerHandler<null> = async (req, res) => {
+    const body: Partial<User> = req.body;
+
+    if (!body.userId) {
+      throw ErrorResponse.MissingRequiredParams();
+    }
+
+    await UsersDB.updateUser(body.userId, body);
+
+    res.send(ApiResponse.success(null));
+  };
 }

@@ -44,7 +44,7 @@ export class UsersDB {
   public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
     const email = requestedEmail.toLowerCase();
 
-    const response = await DB.getInstance().query(this.TABLE_NAME, 'email-index', [{ alias: ':e', expression: 'email', value: email }]);
+    const response = await DB.getInstance().query<User>(this.TABLE_NAME, 'email-index', [{ alias: ':e', expression: 'email', value: email }]);
 
     if (!response.Items?.length) {
       throw ErrorResponse.BadEmailOrPassword();
@@ -58,5 +58,12 @@ export class UsersDB {
     }
 
     return user;
+  };
+
+  public static updateUser = async (userId: string, user: Partial<User>) => {
+    await DB.getInstance().update<User>(this.TABLE_NAME, 'userId', userId, [
+      { alias: ':n', expression: 'name', value: user.name },
+      { alias: ':b', expression: 'branchId', value: user.branchId },
+    ]);
   };
 }

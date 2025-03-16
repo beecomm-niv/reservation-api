@@ -23,7 +23,7 @@ export class ServicesDB {
     );
 
   public static findServiceByKeyAndSecret = async (accessKey: string, accessSecret: string): Promise<Service> => {
-    const response = await DB.getInstance().query(this.TABLE_NAME, 'accessKeyId-accessSecretKey-index', [
+    const response = await DB.getInstance().query<Service>(this.TABLE_NAME, 'accessKeyId-accessSecretKey-index', [
       { alias: ':k', expression: 'accessKeyId', value: accessKey },
       { alias: ':s', expression: 'accessSecretKey', value: accessSecret },
     ]);

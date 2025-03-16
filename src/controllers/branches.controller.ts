@@ -42,7 +42,7 @@ export class BranchesController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    await BranchesDB.updateBranch(body);
+    await BranchesDB.updateBranch(body.branchId, body);
 
     res.send(ApiResponse.success(null));
   };
