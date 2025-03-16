@@ -1,7 +1,7 @@
 import { DynamoDB } from 'aws-sdk';
 import { ErrorResponse } from '../models/error-response.model';
 
-interface UpdateExpression {
+interface Expressions {
   expression: string;
   alias: string;
   value?: any;
@@ -60,24 +60,44 @@ export class DB {
     return response.Item as T;
   };
 
-  public update = async (tableName: string, key: DynamoDB.DocumentClient.Key, expressions: UpdateExpression[]) => {
-    const values = expressions.filter((v) => !!v.value);
+  private getNameAndValuesExpressions = (expressions: Expressions[], join: string) => {
+    const validExpressions = expressions.filter((v) => !!v.value);
 
-    if (!values.length) {
-      throw ErrorResponse.InvalidUpdateExpression();
+    if (!validExpressions) {
+      throw ErrorResponse.InvalidExpression();
     }
 
-    const setExpression = values.map((v) => `#${v.expression} = ${v.alias}`).join(', ');
-    const namesExpression = Object.assign({}, ...values.map((v) => ({ [`#${v.expression}`]: v.expression })));
-    const valuesExpression = Object.assign({}, ...values.map((v) => ({ [v.alias]: v.value })));
+    return {
+      expressionString: validExpressions.map((v) => `#${v.expression} = ${v.alias}`).join(join),
+      names: Object.assign({}, ...validExpressions.map((v) => ({ [`#${v.expression}`]: v.expression }))),
+      values: Object.assign({}, ...validExpressions.map((v) => ({ [v.alias]: v.value }))),
+    };
+  };
+
+  public update = async (tableName: string, key: DynamoDB.DocumentClient.Key, expressions: Expressions[]) => {
+    const { names, values, expressionString } = this.getNameAndValuesExpressions(expressions, ', ');
 
     await this.client
       .update({
         Key: key,
         TableName: tableName,
-        UpdateExpression: `set ${setExpression}`,
-        ExpressionAttributeNames: namesExpression,
-        ExpressionAttributeValues: valuesExpression,
+        UpdateExpression: `set ${expressionString}`,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
+      })
+      .promise();
+  };
+
+  public query = async (tableName: string, indexName: string, expressions: Expressions[]) => {
+    const { names, expressionString, values } = this.getNameAndValuesExpressions(expressions, ' AND ');
+
+    return await this.client
+      .query({
+        TableName: tableName,
+        IndexName: indexName,
+        KeyConditionExpression: expressionString,
+        ExpressionAttributeNames: names,
+        ExpressionAttributeValues: values,
       })
       .promise();
   };

@@ -44,16 +44,7 @@ export class UsersDB {
   public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
     const email = requestedEmail.toLowerCase();
 
-    const response = await DB.getInstance()
-      .client.query({
-        TableName: UsersDB.TABLE_NAME,
-        IndexName: 'email-index',
-        KeyConditionExpression: 'email = :e',
-        ExpressionAttributeValues: {
-          ':e': email,
-        },
-      })
-      .promise();
+    const response = await DB.getInstance().query(this.TABLE_NAME, 'email-index', [{ alias: ':e', expression: 'email', value: email }]);
 
     if (!response.Items?.length) {
       throw ErrorResponse.BadEmailOrPassword();

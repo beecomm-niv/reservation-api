@@ -16,5 +16,5 @@ export class ErrorResponse extends Error {
   public static AuthorizationError = () => new ErrorResponse(1004, 'Authorization error');
   public static BadEmailOrPassword = () => new ErrorResponse(1005, 'Invalid email or password');
   public static EmailAlradyExist = () => new ErrorResponse(1006, 'Email already exists');
-  public static InvalidUpdateExpression = () => new ErrorResponse(1007, 'Invalid update expression');
+  public static InvalidExpression = () => new ErrorResponse(1007, 'Invalid expression');
 }

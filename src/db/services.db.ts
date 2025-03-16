@@ -23,17 +23,10 @@ export class ServicesDB {
     );
 
   public static findServiceByKeyAndSecret = async (accessKey: string, accessSecret: string): Promise<Service> => {
-    const response = await DB.getInstance()
-      .client.query({
-        TableName: ServicesDB.TABLE_NAME,
-        IndexName: 'accessKeyId-accessSecretKey-index',
-        KeyConditionExpression: 'accessKeyId = :k And accessSecretKey = :s',
-        ExpressionAttributeValues: {
-          ':k': accessKey,
-          ':s': accessSecret,
-        },
-      })
-      .promise();
+    const response = await DB.getInstance().query(this.TABLE_NAME, 'accessKeyId-accessSecretKey-index', [
+      { alias: ':k', expression: 'accessKeyId', value: accessKey },
+      { alias: ':s', expression: 'accessSecretKey', value: accessSecret },
+    ]);
 
     if (!response.Items?.length) {
       throw ErrorResponse.SignatureDoesNotMatch();
