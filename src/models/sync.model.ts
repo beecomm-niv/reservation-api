@@ -32,7 +32,7 @@ interface HostReservation {
 }
 
 interface Patron {
-  phone: string;
+  phone?: string;
   name: string;
   status: string;
   note: string;

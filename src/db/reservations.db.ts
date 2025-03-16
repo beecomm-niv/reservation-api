@@ -6,6 +6,7 @@ import { Order } from '../models/order.model';
 
 export class ReservationsDB {
   private static TABLE_NAME = 'reservations';
+  private static RANDOM_PHONE = 'RANDOM';
 
   private static getOrderSummeryFromSync = (sync: Sync, branchName: string) => {
     if (!sync.params.order) return undefined;
@@ -38,7 +39,7 @@ export class ReservationsDB {
   private static syncToReservation = (sync: Sync, branchName: string): Reservation => ({
     syncId: sync.params.syncId,
     branchId: sync.branchId,
-    clientPhone: sync.params.reservation.patron.phone,
+    clientPhone: sync.params.reservation.patron.phone || this.RANDOM_PHONE,
     clientName: sync.params.reservation.patron.name,
     orderSummery: this.getOrderSummeryFromSync(sync, branchName),
     ts: dayjs(sync.params.syncAt).valueOf(),
@@ -117,7 +118,7 @@ export class ReservationsDB {
             reservation: {
               comment: '',
               createdAt: date,
-              createdBy: 'ניב כץ', //TODO: weitress name !
+              createdBy: 'beecomm.pos',
               creditcardStatus: '',
               duration: r.duration,
               expectedDate: etc.format('YYYYMMDD'),
@@ -126,7 +127,7 @@ export class ReservationsDB {
               lastModified: now.valueOf(),
               patron: {
                 name: r.clientName,
-                phone: r.clientPhone || 'RANDOM',
+                phone: r.clientPhone || this.RANDOM_PHONE,
                 note: '',
                 status: '',
               },
