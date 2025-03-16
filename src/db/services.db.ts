@@ -11,10 +11,11 @@ export class ServicesDB {
     DB.getInstance().setItemByKey<Service>(
       ServicesDB.TABLE_NAME,
       {
+        id: crypto.createHash('sha1').update(name).digest('hex'),
         name,
         access,
-        accessKeyId: crypto.randomBytes(20).toString('base64url'),
-        accessSecretKey: crypto.randomBytes(40).toString('base64url'),
+        accessKeyId: crypto.randomBytes(20).toString('hex'),
+        accessSecretKey: crypto.randomBytes(40).toString('hex'),
       },
       {
         deniedOverride: true,
@@ -33,5 +34,9 @@ export class ServicesDB {
     }
 
     return response.Items[0] as Service;
+  };
+
+  public static updateService = async (id: string, service: Partial<Service>) => {
+    await DB.getInstance().update<Service>(this.TABLE_NAME, 'id', id, [{ alias: ':a', expression: 'access', value: service.access }]);
   };
 }

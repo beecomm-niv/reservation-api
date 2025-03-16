@@ -3,6 +3,7 @@ import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
 import { ACCESS } from '../models/jwt-payload.model';
+import { Service } from '../models/service.model';
 import { JwtService } from '../services/jwt.service';
 
 interface CreateServiceBody {
@@ -36,8 +37,20 @@ export class ServiceController {
     }
 
     const service = await ServicesDB.findServiceByKeyAndSecret(body.accessKeyId, body.accessSecretKey);
-    const token = JwtService.sign({ access: service.access, id: service.name, role: 'service' });
+    const token = JwtService.sign({ access: service.access, id: service.id, role: 'service' });
 
     res.send(ApiResponse.success(token));
+  };
+
+  public static updateService: ControllerHandler<null> = async (req, res) => {
+    const body: Partial<Service> = req.body;
+
+    if (!body.id) {
+      throw ErrorResponse.MissingRequiredParams();
+    }
+
+    await ServicesDB.updateService(body.id, body);
+
+    res.send(ApiResponse.success(null));
   };
 }

@@ -8,4 +8,6 @@ router.post('/create', AuthController.verify('super_admin', false), ServiceContr
 
 router.post('/token', ServiceController.getToken);
 
+router.put('/', AuthController.verify('super_admin', false), ServiceController.updateService);
+
 export const servicesRouter = router;
