@@ -3,6 +3,7 @@ import { Sync } from './sync.model';
 export interface OrderSummery {
   branchName: string;
 
+  orderId: number;
   table: number;
   dinners: number;
   totalOrder: number;

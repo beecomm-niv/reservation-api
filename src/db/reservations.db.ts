@@ -14,6 +14,7 @@ export class ReservationsDB {
     const order = sync.params.order;
     const summery: OrderSummery = {
       branchName,
+      orderId: order.orderId,
       table: order.tableNum,
       dinners: order.dinners,
       discount: order.discount,
