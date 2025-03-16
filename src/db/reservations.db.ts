@@ -49,6 +49,8 @@ export class ReservationsDB {
     const reservation = this.syncToReservation(sync, branchName);
 
     await DB.getInstance().setItemByKey(ReservationsDB.TABLE_NAME, reservation);
+
+    return reservation;
   };
 
   public static getReservation = async (syncId: string) => await DB.getInstance().findItemByKey<Reservation>(ReservationsDB.TABLE_NAME, { syncId });
@@ -124,7 +126,7 @@ export class ReservationsDB {
               lastModified: now.valueOf(),
               patron: {
                 name: r.clientName,
-                phone: r.clientPhone,
+                phone: r.clientPhone || 'RANDOM',
                 note: '',
                 status: '',
               },
@@ -143,17 +145,7 @@ export class ReservationsDB {
   public static setReservationsFromPos = async (branchId: string, posReservations: ReservationDto[]) => {
     const reservations = this.dtoToReservations(branchId, posReservations);
 
-    await DB.getInstance()
-      .client.batchWrite({
-        RequestItems: {
-          [ReservationsDB.TABLE_NAME]: reservations.map((r) => ({
-            PutRequest: {
-              Item: r,
-            },
-          })),
-        },
-      })
-      .promise();
+    await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
 
     return reservations;
   };

@@ -39,10 +39,14 @@ export class ReservationsController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
+    if (!body.params.reservation.patron.phone) {
+      body.params.reservation.patron.phone = 'RANDOM';
+    }
+
     // TODO: for now we only handled seated reservations from external service host system. we handle all statuses once we have our host system.
     if (body.params.reservation.status === 'seated') {
-      await ReservationsDB.setReservation(body, '');
-      await AdapterService.getInstance().sendReservation(body);
+      const reservation = await ReservationsDB.setReservation(body, '');
+      await AdapterService.getInstance().sendReservation(reservation);
 
       if (req.user?.role === 'user') {
         // TODO: update external reservations service.

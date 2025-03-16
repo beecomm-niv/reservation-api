@@ -1,6 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { ReservationDto } from '../models/reservation';
-import { Sync } from '../models/sync.model';
+import { Reservation, ReservationDto } from '../models/reservation';
 
 interface AdapterResponse<T> {
   error: boolean;
@@ -36,16 +35,16 @@ export class AdapterService {
     return this.instance;
   };
 
-  public sendReservation = async (sync: Sync) => {
+  public sendReservation = async (reservation: Reservation) => {
     const body: SendReservationBody = {
-      branchId: sync.branchId,
+      branchId: reservation.branchId,
       reservation: {
-        clientName: sync.params.reservation.patron.name,
-        clientPhone: sync.params.reservation.patron.phone,
-        dinners: sync.params.reservation.size,
-        syncId: sync.params.syncId,
-        tableNum: +sync.params.reservation.table[0],
-        duration: sync.params.reservation.duration,
+        clientName: reservation.clientName,
+        clientPhone: reservation.clientPhone,
+        dinners: reservation.sync.params.reservation.size,
+        syncId: reservation.syncId,
+        tableNum: +reservation.sync.params.reservation.table[0],
+        duration: reservation.sync.params.reservation.duration,
       },
     };
 
