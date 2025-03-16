@@ -102,4 +102,34 @@ export class DB {
       })
       .promise();
   };
+
+  public multiWrite = async <T>(tableName: string, items: T[]) => {
+    if (!items.length) return;
+
+    await this.client
+      .batchWrite({
+        RequestItems: {
+          [tableName]: items.map((i) => ({
+            PutRequest: {
+              Item: i as any,
+            },
+          })),
+        },
+      })
+      .promise();
+  };
+
+  public multiGet = async <T>(tableName: string, keys: DynamoDB.DocumentClient.KeyList) => {
+    const response = await this.client
+      .batchGet({
+        RequestItems: {
+          [tableName]: {
+            Keys: keys,
+          },
+        },
+      })
+      .promise();
+
+    return (response.Responses?.[tableName] || []) as T[];
+  };
 }

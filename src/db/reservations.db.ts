@@ -161,30 +161,17 @@ export class ReservationsDB {
   public static mergeOrdersToReservations = async (branchName: string, body: Order[]): Promise<Sync[]> => {
     const ordersMap = body.reduce<Record<string, Order>>((prev, o) => ({ ...prev, [o.syncId]: o }), {});
 
-    const result = await DB.getInstance()
-      .client.batchGet({
-        RequestItems: {
-          [ReservationsDB.TABLE_NAME]: {
-            Keys: body.map((r) => ({ syncId: r.syncId })),
-          },
-        },
-      })
-      .promise();
+    const reservations = await DB.getInstance().multiGet<Reservation>(
+      this.TABLE_NAME,
+      body.map((r) => ({ syncId: r.syncId }))
+    );
 
-    const reservations = (result.Responses?.[ReservationsDB.TABLE_NAME] || []) as Reservation[];
     const syncs = reservations.map((r) => ({ ...r.sync, params: { ...r.sync.params, order: ordersMap[r.syncId] } }));
 
-    await DB.getInstance()
-      .client.batchWrite({
-        RequestItems: {
-          [ReservationsDB.TABLE_NAME]: syncs.map((s) => ({
-            PutRequest: {
-              Item: ReservationsDB.syncToReservation(s, branchName),
-            },
-          })),
-        },
-      })
-      .promise();
+    await DB.getInstance().multiWrite(
+      this.TABLE_NAME,
+      syncs.map((s) => ReservationsDB.syncToReservation(s, branchName))
+    );
 
     return syncs;
   };
