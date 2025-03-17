@@ -9,31 +9,37 @@ export interface Sync {
 interface Params {
   syncId: string;
   syncAt: string;
+  reservation?: HostReservation;
   order?: Order;
-  reservation: HostReservation;
 }
 
 interface HostReservation {
   reservationId: string;
-  createdBy: string;
-  createdAt: string;
-  duration: number;
-  expectedDate: string;
-  expectedTime: string;
-  patron: Patron;
-  size: number;
-  status: string;
+  createdBy: string | null;
+  createdAt: string | null;
+  duration: number | null;
+  expectedDate: string | null;
+  expectedTime: string | null;
+  patron: Patron | null;
+  size: number | null;
+  status: ReservationStatus | null;
   table: string[];
-  comment: string;
-  creditcardStatus: string;
-  stage: string;
-  hasPackage: boolean;
-  lastModified: number;
+  comment: string | null;
+  creditcardStatus: CreditCardStatus | null;
+  stage: ReservationStage | null;
+  hasPackage: boolean | null;
+  lastModified: number | null;
 }
 
 interface Patron {
-  phone?: string;
-  name: string;
-  status: string;
-  note: string;
+  phone: string | null;
+  name: string | null;
+  status: string | null;
+  note: string | null;
 }
+
+type ReservationStatus = 'done' | 'deleted' | 'noShow' | 'canceled' | 'seated' | 'approved' | 'standby' | 'invited' | 'callback' | 'empty' | 'queue';
+
+type CreditCardStatus = 'waiting' | 'manualVerified' | 'notVerified' | 'verified';
+
+type ReservationStage = 'preOrder' | 'ordered' | 'starters' | 'main' | 'dessert' | 'check' | 'paid' | 'done';

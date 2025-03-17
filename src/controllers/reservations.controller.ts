@@ -25,7 +25,7 @@ export class ReservationsController {
   public static setReservation: ControllerHandler<null> = async (req, res) => {
     const body: Sync = req.body;
 
-    if (!body.branchId || !body.params.syncId || !body.params.reservation.table.length) {
+    if (!body.branchId || !body.params.syncId || !body.params.reservation?.table.length) {
       throw ErrorResponse.MissingRequiredParams();
     }
 

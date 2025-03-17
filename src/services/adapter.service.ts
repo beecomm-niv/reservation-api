@@ -41,10 +41,10 @@ export class AdapterService {
       reservation: {
         clientName: reservation.clientName,
         clientPhone: reservation.clientPhone,
-        dinners: reservation.sync.params.reservation.size,
+        dinners: reservation.sync.params.reservation?.size || 1,
         syncId: reservation.syncId,
-        tableNum: +reservation.sync.params.reservation.table[0],
-        duration: reservation.sync.params.reservation.duration,
+        tableNum: +(reservation.sync.params.reservation?.table[0] || 0),
+        duration: reservation.sync.params.reservation?.duration || 0,
       },
     };
 
