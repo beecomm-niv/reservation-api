@@ -57,46 +57,6 @@ export class ReservationsDB {
 
   public static getReservation = async (syncId: string) => await DB.getInstance().findItemByKey<Reservation>(ReservationsDB.TABLE_NAME, { syncId });
 
-  // public static queryReservationsByClientPhone = async (fullFetch: boolean, clientPhone: string, branchId?: string): Promise<Reservation[]> => {
-  //   const condition = 'clientPhone = :phone' + (branchId ? ' And branchId = :branch' : '');
-  //   const values: Record<string, any> = {
-  //     ':phone': clientPhone,
-  //   };
-
-  //   if (branchId) {
-  //     values[':branch'] = branchId;
-  //   }
-
-  //   const projection: string | undefined = fullFetch ? undefined : 'syncId, clientName, branchId, orderSummery, ts';
-
-  //   const response = await DB.getInstance()
-  //     .client.query({
-  //       TableName: ReservationsDB.TABLE_NAME,
-  //       IndexName: 'findReservationsByClientPhone',
-  //       KeyConditionExpression: condition,
-  //       ExpressionAttributeValues: values,
-  //       ProjectionExpression: projection,
-  //     })
-  //     .promise();
-
-  //   return (response.Items || []) as Reservation[];
-  // };
-
-  // public static queryReservationsByBranch = async (branchId: string): Promise<Reservation[]> => {
-  //   const response = await DB.getInstance()
-  //     .client.query({
-  //       TableName: ReservationsDB.TABLE_NAME,
-  //       IndexName: 'findReservationsByDate', // findReservationsByBranch
-  //       KeyConditionExpression: 'branchId = :branch',
-  //       ExpressionAttributeValues: {
-  //         ':branch': branchId,
-  //       },
-  //     })
-  //     .promise();
-
-  //   return (response.Items || []) as Reservation[];
-  // };
-
   private static dtoToReservations = (branchId: string, posReservations: ReservationDto[]) => {
     const now = dayjs();
     const date = now.utc().local().format();
