@@ -34,7 +34,7 @@ interface HostReservation {
 interface Patron {
   phone: string | null;
   name: string | null;
-  status: string | null;
+  status: PatronStatus | null;
   note: string | null;
 }
 
@@ -43,3 +43,5 @@ type ReservationStatus = 'done' | 'deleted' | 'noShow' | 'canceled' | 'seated' |
 type CreditCardStatus = 'waiting' | 'manualVerified' | 'notVerified' | 'verified';
 
 type ReservationStage = 'preOrder' | 'ordered' | 'starters' | 'main' | 'dessert' | 'check' | 'paid' | 'done';
+
+type PatronStatus = 'visitor' | 'member' | 'returning' | 'problematic' | 'vip';

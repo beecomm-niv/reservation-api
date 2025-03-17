@@ -90,7 +90,7 @@ export class ReservationsDB {
                 name: r.clientName,
                 phone: r.clientPhone || this.RANDOM_PHONE,
                 note: '',
-                status: '',
+                status: 'member',
               },
               reservationId: r.syncId,
               size: r.dinners,
