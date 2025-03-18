@@ -22,15 +22,8 @@ export class OntopoService {
     return this.instance;
   };
 
-  public setReservation = (branchId: string, syncId: string, syncAt: string, order: Order | undefined, reservation: HostReservation | undefined) => {
-    const dto: Sync = {
-      syncAt: syncAt,
-      syncId: syncId,
-      order: order,
-      reservation: reservation,
-    };
-
-    this.api.post('/pos/setReservation', dto, {
+  public setReservation = (branchId: string, sync: Sync) => {
+    this.api.post('/pos/setReservation', sync, {
       timeout: 10_000,
       headers: {
         'x-api-key': branchId,
