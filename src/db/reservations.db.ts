@@ -25,12 +25,12 @@ export class ReservationsDB {
     return reservations;
   };
 
-  public static mergeOrdersToReservations = async (branchName: string, body: Order[]): Promise<Reservation[]> => {
-    const ordersMap = body.reduce<Record<string, Order>>((prev, o) => ({ ...prev, [o.syncId]: o }), {});
+  public static mergeOrdersToReservations = async (branchName: string, orders: Order[]): Promise<Reservation[]> => {
+    const ordersMap = Object.assign({}, ...orders.map((o) => ({ [o.syncId]: o })));
 
     const dbReservations = await DB.getInstance().multiGet<Reservation>(
       this.TABLE_NAME,
-      body.map((r) => ({ syncId: r.syncId }))
+      orders.map((r) => ({ syncId: r.syncId }))
     );
 
     const reservations = dbReservations.map<Reservation>((r) =>
