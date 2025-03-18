@@ -34,7 +34,7 @@ export class ReservationsDB {
     );
 
     const reservations = dbReservations.map<Reservation>((r) =>
-      ReservationsService.syncToReservation(r.branchId, { syncAt: r.syncAt, syncId: r.syncId, order: r.order, reservation: r.reservation }, branchName)
+      ReservationsService.syncToReservation(r.branchId, { syncAt: r.syncAt, syncId: r.syncId, order: ordersMap[r.syncId], reservation: r.reservation }, branchName)
     );
 
     await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
