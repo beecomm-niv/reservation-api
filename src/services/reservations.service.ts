@@ -4,7 +4,7 @@ import { OrderSummery, Reservation, ReservationDto } from '../models/reservation
 import { Sync } from '../models/sync.model';
 
 export class ReservationsService {
-  private static RANDOM_PHONE = 'RANDOM';
+  private static RANDOM_PHONE = '0000000000';
   private static RANDOM_NAME = 'RANDOM';
 
   private static convertPhoneNumber = (phone: string) => phone.replace('+972', '0');
