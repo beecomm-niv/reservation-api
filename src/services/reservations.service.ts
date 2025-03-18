@@ -7,6 +7,8 @@ export class ReservationsService {
   private static RANDOM_PHONE = 'RANDOM';
   private static RANDOM_NAME = 'RANDOM';
 
+  private static convertPhoneNumber = (phone: string) => phone.replace('+972', '0');
+
   public static orderToSummery = (order: Order | undefined, branchName: string): OrderSummery | undefined => {
     if (!order) return undefined;
 
@@ -35,15 +37,20 @@ export class ReservationsService {
     return summery;
   };
 
-  public static syncToReservation = (sync: Sync, branchName: string): Reservation => ({
-    syncId: sync.params.syncId,
-    branchId: sync.branchId,
-    clientPhone: sync.params.reservation?.patron?.phone || this.RANDOM_PHONE,
-    clientName: sync.params.reservation?.patron?.name || this.RANDOM_NAME,
-    orderSummery: this.orderToSummery(sync.params.order, branchName),
-    ts: dayjs(sync.params.syncAt).valueOf(),
-    sync,
-  });
+  public static syncToReservation = (sync: Sync, branchName: string): Reservation => {
+    const clientPhone = this.convertPhoneNumber(sync.params.reservation?.patron?.phone || this.RANDOM_PHONE);
+    const clientName = sync.params.reservation?.patron?.name || this.RANDOM_NAME;
+
+    return {
+      syncId: sync.params.syncId,
+      branchId: sync.branchId,
+      clientPhone,
+      clientName,
+      orderSummery: this.orderToSummery(sync.params.order, branchName),
+      ts: dayjs(sync.params.syncAt).valueOf(),
+      sync,
+    };
+  };
 
   public static dtoToReservations = (branchId: string, posReservations: ReservationDto[]) => {
     const now = dayjs();
@@ -51,11 +58,13 @@ export class ReservationsService {
 
     return posReservations.map<Reservation>((r) => {
       const etc = now.add(r.duration, 'minutes');
+      const phone = this.convertPhoneNumber(r.clientPhone || this.RANDOM_PHONE);
+      const name = r.clientName || this.RANDOM_NAME;
 
       return {
         branchId,
-        clientName: r.clientName,
-        clientPhone: r.clientPhone,
+        clientName: name,
+        clientPhone: phone,
         syncId: r.syncId,
         ts: now.valueOf(),
         sync: {
@@ -75,8 +84,8 @@ export class ReservationsService {
               hasPackage: false,
               lastModified: now.valueOf(),
               patron: {
-                name: r.clientName || this.RANDOM_NAME,
-                phone: r.clientPhone || this.RANDOM_PHONE,
+                name,
+                phone,
                 note: '',
                 status: 'member',
               },

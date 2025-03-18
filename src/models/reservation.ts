@@ -24,8 +24,8 @@ export interface Reservation {
 
 export interface ReservationDto {
   syncId: string;
-  clientPhone: string;
-  clientName: string;
+  clientPhone?: string;
+  clientName?: string;
   tableNum: number;
   dinners: number;
   duration: number;
