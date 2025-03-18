@@ -41,11 +41,11 @@ export class AdapterService {
       reservation: {
         clientName: reservation.clientName,
         clientPhone: reservation.clientPhone,
-        dinners: reservation.sync.params.reservation?.size || 1,
+        dinners: reservation.reservation?.size || 1,
         syncId: reservation.syncId,
-        tableNum: +(reservation.sync.params.reservation?.table[0] || 0),
-        duration: reservation.sync.params.reservation?.duration || 0,
-        clientStatus: reservation.sync.params.reservation?.patron?.status || 'member',
+        tableNum: +(reservation.reservation?.table[0] || 0),
+        duration: reservation.reservation?.duration || 0,
+        clientStatus: reservation.reservation?.patron?.status || 'member',
       },
     };
 

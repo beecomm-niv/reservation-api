@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { Sync, SyncParams } from '../models/sync.model';
+import { SyncDto, Sync } from '../models/sync.model';
 
 export class OntopoService {
   private static instance: OntopoService;
@@ -21,14 +21,19 @@ export class OntopoService {
     return this.instance;
   };
 
-  public setReservation = (sync: SyncParams, branchId: string) => {
-    try {
-      this.api.post('/pos/setReservation', sync, {
-        timeout: 10_000,
-        headers: {
-          'x-api-key': branchId,
-        },
-      });
-    } catch {}
+  public setReservation = (sync: Sync, branchId: string) => {
+    const dto: Sync = {
+      syncAt: sync.syncAt,
+      syncId: sync.syncId,
+      order: sync.order,
+      reservation: sync.reservation,
+    };
+
+    this.api.post('/pos/setReservation', dto, {
+      timeout: 10_000,
+      headers: {
+        'x-api-key': branchId,
+      },
+    });
   };
 }

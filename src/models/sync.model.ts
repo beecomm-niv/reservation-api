@@ -1,12 +1,12 @@
 import { Order } from './order.model';
 
-export interface Sync {
+export interface SyncDto {
   branchId: string;
   externalBranchId?: string;
-  params: SyncParams;
+  params: Sync;
 }
 
-export interface SyncParams {
+export interface Sync {
   syncId: string;
   syncAt: string;
   reservation?: HostReservation;

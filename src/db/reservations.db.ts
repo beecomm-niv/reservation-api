@@ -1,4 +1,4 @@
-import { Sync } from '../models/sync.model';
+import { Sync, SyncDto } from '../models/sync.model';
 import { DB } from './db';
 import { Reservation, ReservationDto } from '../models/reservation';
 import { Order } from '../models/order.model';
@@ -7,7 +7,7 @@ import { ReservationsService } from '../services/reservations.service';
 export class ReservationsDB {
   private static TABLE_NAME = 'reservations';
 
-  public static setReservation = async (sync: Sync, branchName: string) => {
+  public static setReservation = async (sync: SyncDto, branchName: string) => {
     const reservation = ReservationsService.syncToReservation(sync, branchName);
 
     await DB.getInstance().setItemByKey(ReservationsDB.TABLE_NAME, reservation);
@@ -25,21 +25,20 @@ export class ReservationsDB {
     return reservations;
   };
 
-  public static mergeOrdersToReservations = async (branchName: string, body: Order[]): Promise<Sync[]> => {
+  public static mergeOrdersToReservations = async (branchName: string, body: Order[]): Promise<Reservation[]> => {
     const ordersMap = body.reduce<Record<string, Order>>((prev, o) => ({ ...prev, [o.syncId]: o }), {});
 
-    const reservations = await DB.getInstance().multiGet<Reservation>(
+    const dbReservations = await DB.getInstance().multiGet<Reservation>(
       this.TABLE_NAME,
       body.map((r) => ({ syncId: r.syncId }))
     );
 
-    const syncs = reservations.map<Sync>((r) => ({ ...r.sync, params: { ...r.sync.params, order: ordersMap[r.syncId] } }));
-
-    await DB.getInstance().multiWrite(
-      this.TABLE_NAME,
-      syncs.map((s) => ReservationsService.syncToReservation(s, branchName))
+    const reservations = dbReservations.map<Reservation>((r) =>
+      ReservationsService.syncToReservation({ branchId: r.branchId, params: { syncAt: r.syncAt, syncId: r.syncId, reservation: r.reservation, order: ordersMap[r.syncId] } }, branchName)
     );
 
-    return syncs;
+    await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
+
+    return reservations;
   };
 }

@@ -11,15 +11,13 @@ export interface OrderSummery {
   service: number;
 }
 
-export interface Reservation {
-  syncId: string;
+export interface Reservation extends Sync {
   branchId: string;
   clientPhone: string;
   clientName: string;
   ts: number;
 
   orderSummery?: OrderSummery;
-  sync: Sync;
 }
 
 export interface ReservationDto {
