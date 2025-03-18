@@ -45,6 +45,7 @@ export class AdapterService {
         syncId: reservation.syncId,
         tableNum: +(reservation.sync.params.reservation?.table[0] || 0),
         duration: reservation.sync.params.reservation?.duration || 0,
+        clientStatus: reservation.sync.params.reservation?.patron?.status || 'member',
       },
     };
 

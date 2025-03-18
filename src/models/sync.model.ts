@@ -1,12 +1,12 @@
 import { Order } from './order.model';
 
 export interface Sync {
-  action: string;
   branchId: string;
-  params: Params;
+  externalBranchId?: string;
+  params: SyncParams;
 }
 
-interface Params {
+export interface SyncParams {
   syncId: string;
   syncAt: string;
   reservation?: HostReservation;
@@ -44,4 +44,4 @@ type CreditCardStatus = 'waiting' | 'manualVerified' | 'notVerified' | 'verified
 
 type ReservationStage = 'preOrder' | 'ordered' | 'starters' | 'main' | 'dessert' | 'check' | 'paid' | 'done';
 
-type PatronStatus = 'visitor' | 'member' | 'returning' | 'problematic' | 'vip';
+export type PatronStatus = 'visitor' | 'member' | 'returning' | 'problematic' | 'vip';

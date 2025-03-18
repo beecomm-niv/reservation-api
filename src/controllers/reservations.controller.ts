@@ -6,10 +6,12 @@ import { Order } from '../models/order.model';
 import { Reservation, ReservationDto } from '../models/reservation';
 import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
+import { OntopoService } from '../services/ontopo.service';
 import { RealTimeService } from '../services/realtime.service';
 
 interface MergeOrdersToReservationBody {
   branchName: string;
+  externalBranchId: string;
   orders?: Order[];
 }
 
@@ -29,13 +31,12 @@ export class ReservationsController {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    // TODO: for now we only handled seated reservations from external service host system. we handle all statuses once we have our host system.
     if (body.params.reservation.status === 'seated') {
       const reservation = await ReservationsDB.setReservation(body, '');
       await AdapterService.getInstance().sendReservation(reservation);
 
-      if (req.user?.role === 'user') {
-        // TODO: update external reservations service.
+      if (req.user?.role === 'user' && body.externalBranchId) {
+        OntopoService.getInstance().setReservation(body.params, body.externalBranchId);
       }
     }
 
@@ -64,8 +65,10 @@ export class ReservationsController {
     const newReservations = reservations.filter((r) => r.isNew);
 
     if (newReservations.length) {
-      await ReservationsDB.setReservationsFromPos(branchId, reservations);
-      // TODO: send to external host service this new reservations
+      const syncs = await ReservationsDB.setReservationsFromPos(branchId, reservations);
+      const ontopo = OntopoService.getInstance();
+
+      syncs.forEach((s) => ontopo.setReservation(s.sync.params, externalBranchId));
     }
 
     if (reservations.length || removed.length || init) {
@@ -76,14 +79,16 @@ export class ReservationsController {
   };
 
   public static mergeOrdersToReservations: ControllerHandler<null> = async (req, res) => {
-    const { branchName, orders }: MergeOrdersToReservationBody = req.body;
+    const { branchName, orders, externalBranchId }: MergeOrdersToReservationBody = req.body;
 
-    if (!branchName || !orders?.length) {
+    if (!branchName || !externalBranchId || !orders?.length) {
       throw ErrorResponse.InvalidParams();
     }
 
     const result = await ReservationsDB.mergeOrdersToReservations(branchName, orders);
-    // TODO: update external reservation serivce with the new sync inculde the pos order.
+    const ontopo = OntopoService.getInstance();
+
+    result.forEach((r) => ontopo.setReservation(r.params, externalBranchId));
 
     res.send(ApiResponse.success(null));
   };

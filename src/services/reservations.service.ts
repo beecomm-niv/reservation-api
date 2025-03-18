@@ -68,7 +68,6 @@ export class ReservationsService {
         syncId: r.syncId,
         ts: now.valueOf(),
         sync: {
-          action: 'object_sync',
           branchId,
           params: {
             syncId: r.syncId,

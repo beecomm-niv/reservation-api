@@ -1,4 +1,4 @@
-import { Sync } from './sync.model';
+import { PatronStatus, Sync } from './sync.model';
 
 export interface OrderSummery {
   branchName: string;
@@ -29,6 +29,7 @@ export interface ReservationDto {
   tableNum: number;
   dinners: number;
   duration: number;
+  clientStatus: PatronStatus;
 
   orderId?: number;
   isNew?: boolean;
