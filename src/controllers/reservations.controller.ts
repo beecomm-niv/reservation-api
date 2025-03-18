@@ -55,34 +55,34 @@ export class ReservationsController {
   };
 
   public static setPosReservations: ControllerHandler<null> = async (req, res) => {
-    const body: SetPosReservationsBody = req.body;
+    const { branchId, externalBranchId, init, removed, reservations }: SetPosReservationsBody = req.body;
 
-    if (!body.branchId || !body.reservations || !body.externalBranchId || !body.removed) {
+    if (!branchId || !reservations || !externalBranchId || !removed) {
       throw ErrorResponse.InvalidParams();
     }
 
-    const newReservations = body.reservations.filter((r) => r.isNew);
+    const newReservations = reservations.filter((r) => r.isNew);
 
     if (newReservations.length) {
-      await ReservationsDB.setReservationsFromPos(body.branchId, body.reservations);
+      await ReservationsDB.setReservationsFromPos(branchId, reservations);
       // TODO: send to external host service this new reservations
     }
 
-    if (body.reservations.length || body.removed.length || body.init) {
-      await RealTimeService.setReservations(body.branchId, body.reservations, body.removed, !!body.init);
+    if (reservations.length || removed.length || init) {
+      await RealTimeService.setReservations(branchId, reservations, removed, !!init);
     }
 
     res.send(ApiResponse.success(null));
   };
 
   public static mergeOrdersToReservations: ControllerHandler<null> = async (req, res) => {
-    const body: MergeOrdersToReservationBody = req.body;
+    const { branchName, orders }: MergeOrdersToReservationBody = req.body;
 
-    if (!body.branchName || !body.orders?.length) {
+    if (!branchName || !orders?.length) {
       throw ErrorResponse.InvalidParams();
     }
 
-    const result = await ReservationsDB.mergeOrdersToReservations(body.branchName, body.orders);
+    const result = await ReservationsDB.mergeOrdersToReservations(branchName, orders);
     // TODO: update external reservation serivce with the new sync inculde the pos order.
 
     res.send(ApiResponse.success(null));

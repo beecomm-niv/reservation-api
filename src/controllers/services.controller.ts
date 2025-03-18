@@ -18,25 +18,25 @@ interface GetTokenBody {
 
 export class ServiceController {
   public static createService: ControllerHandler<null> = async (req, res) => {
-    const body: CreateServiceBody = req.body;
+    const { access, name }: CreateServiceBody = req.body;
 
-    if (!body.access || !body.name) {
+    if (!access || !name) {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    await ServicesDB.createService(body.name, body.access);
+    await ServicesDB.createService(name, access);
 
     res.send(ApiResponse.success(null));
   };
 
   public static getToken: ControllerHandler<string> = async (req, res) => {
-    const body: GetTokenBody = req.body;
+    const { accessKeyId, accessSecretKey }: GetTokenBody = req.body;
 
-    if (!body.accessKeyId || !body.accessSecretKey) {
+    if (!accessKeyId || !accessSecretKey) {
       throw ErrorResponse.SignatureDoesNotMatch();
     }
 
-    const service = await ServicesDB.findServiceByKeyAndSecret(body.accessKeyId, body.accessSecretKey);
+    const service = await ServicesDB.findServiceByKeyAndSecret(accessKeyId, accessSecretKey);
     const token = JwtService.sign({ access: service.access, id: service.id, role: 'service' });
 
     res.send(ApiResponse.success(token));

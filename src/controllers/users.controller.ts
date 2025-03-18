@@ -1,55 +1,24 @@
-import { Response } from 'express';
 import { UsersDB } from '../db/users.db';
 import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
 import { User, UserDto } from '../models/user.model';
-import { JwtService } from '../services/jwt.service';
-import { Branch } from '../models/branch.model';
-import { BranchesDB } from '../db/branches.db';
+import { UsersService } from '../services/users.service';
 
-interface EmailAndPassword {
+interface CreateUserBody {
   email?: string;
   password?: string;
   name?: string;
 }
 
+interface GetUserBody {
+  email?: string;
+  password?: string;
+}
+
 export class UsersController {
-  private static getBranchByUser = async (user: User): Promise<Branch | null> => {
-    let branch: Branch | null = null;
-
-    try {
-      if (user.role === 'user' && user.branchId) {
-        branch = await BranchesDB.getBranchById(user.branchId);
-      }
-    } catch {}
-
-    return branch;
-  };
-
-  private static userToDto = (user: User, branch: Branch | null): UserDto => ({
-    branch,
-    email: user.email,
-    name: user.name,
-    role: user.role,
-    userId: user.userId,
-  });
-
-  private static setTokenInHeader = (user: User, res: Response) => {
-    const token = JwtService.sign({
-      access: ['*'],
-      id: user.userId,
-      role: user.role,
-    });
-
-    const HEADER_NAME = 'x-auth-token';
-
-    res.setHeader(HEADER_NAME, token);
-    res.setHeader('Access-Control-Expose-Headers', HEADER_NAME);
-  };
-
   public static createUser: ControllerHandler<UserDto> = async (req, res) => {
-    const { email, name, password }: EmailAndPassword = req.body;
+    const { email, name, password }: CreateUserBody = req.body;
 
     if (!email || !password || !name) {
       throw ErrorResponse.MissingRequiredParams();
@@ -57,22 +26,22 @@ export class UsersController {
 
     const user = await UsersDB.createUser(email, password, name);
 
-    res.send(ApiResponse.success(this.userToDto(user, null)));
+    res.send(ApiResponse.success(UsersService.userToDto(user, null)));
   };
 
   public static getUserByEmailAndPassword: ControllerHandler<UserDto> = async (req, res) => {
-    const body: EmailAndPassword = req.body;
+    const { email, password }: GetUserBody = req.body;
 
-    if (!body.email || !body.password) {
+    if (!email || !password) {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    const user = await UsersDB.getUserByEmailAndPassword(body.email, body.password);
-    const branch = await this.getBranchByUser(user);
+    const user = await UsersDB.getUserByEmailAndPassword(email, password);
+    const branch = await UsersService.getBranchByUser(user);
 
-    this.setTokenInHeader(user, res);
+    UsersService.setTokenInHeader(user, res);
 
-    res.send(ApiResponse.success(this.userToDto(user, branch)));
+    res.send(ApiResponse.success(UsersService.userToDto(user, branch)));
   };
 
   public static getUserFromToken: ControllerHandler<UserDto> = async (req, res) => {
@@ -83,9 +52,9 @@ export class UsersController {
     }
 
     const user = await UsersDB.getUserById(userId);
-    const branch = await this.getBranchByUser(user);
+    const branch = await UsersService.getBranchByUser(user);
 
-    res.send(ApiResponse.success(this.userToDto(user, branch)));
+    res.send(ApiResponse.success(UsersService.userToDto(user, branch)));
   };
 
   public static updateUser: ControllerHandler<null> = async (req, res) => {

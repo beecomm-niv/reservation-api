@@ -1,0 +1,94 @@
+import dayjs from 'dayjs';
+import { Order } from '../models/order.model';
+import { OrderSummery, Reservation, ReservationDto } from '../models/reservation';
+import { Sync } from '../models/sync.model';
+
+export class ReservationsService {
+  private static RANDOM_PHONE = 'RANDOM';
+  private static RANDOM_NAME = 'RANDOM';
+
+  public static orderToSummery = (order: Order | undefined, branchName: string): OrderSummery | undefined => {
+    if (!order) return undefined;
+
+    const summery: OrderSummery = {
+      branchName,
+      orderId: order.orderId,
+      table: order.tableNum,
+      dinners: order.dinners,
+      discount: order.discount,
+      service: order.service,
+      totalOrder: 0,
+    };
+
+    order.dishes.forEach((d) => {
+      if (!d.isCancel) {
+        summery.totalOrder += d.totalPrice;
+      }
+
+      d.toppings.forEach((t) => {
+        if (!t.isCancel) {
+          summery.totalOrder += t.totalPrice;
+        }
+      });
+    });
+
+    return summery;
+  };
+
+  public static syncToReservation = (sync: Sync, branchName: string): Reservation => ({
+    syncId: sync.params.syncId,
+    branchId: sync.branchId,
+    clientPhone: sync.params.reservation?.patron?.phone || this.RANDOM_PHONE,
+    clientName: sync.params.reservation?.patron?.name || this.RANDOM_NAME,
+    orderSummery: this.orderToSummery(sync.params.order, branchName),
+    ts: dayjs(sync.params.syncAt).valueOf(),
+    sync,
+  });
+
+  public static dtoToReservations = (branchId: string, posReservations: ReservationDto[]) => {
+    const now = dayjs();
+    const date = now.utc().local().format();
+
+    return posReservations.map<Reservation>((r) => {
+      const etc = now.add(r.duration, 'minutes');
+
+      return {
+        branchId,
+        clientName: r.clientName,
+        clientPhone: r.clientPhone,
+        syncId: r.syncId,
+        ts: now.valueOf(),
+        sync: {
+          action: 'object_sync',
+          branchId,
+          params: {
+            syncId: r.syncId,
+            syncAt: date,
+            reservation: {
+              comment: '',
+              createdAt: date,
+              createdBy: 'beecomm.pos',
+              creditcardStatus: 'verified',
+              duration: r.duration,
+              expectedDate: etc.format('YYYYMMDD'),
+              expectedTime: etc.format('HHmm'),
+              hasPackage: false,
+              lastModified: now.valueOf(),
+              patron: {
+                name: r.clientName || this.RANDOM_NAME,
+                phone: r.clientPhone || this.RANDOM_PHONE,
+                note: '',
+                status: 'member',
+              },
+              reservationId: r.syncId,
+              size: r.dinners,
+              stage: 'preOrder',
+              status: 'seated',
+              table: [r.tableNum.toString()],
+            },
+          },
+        },
+      };
+    });
+  };
+}
