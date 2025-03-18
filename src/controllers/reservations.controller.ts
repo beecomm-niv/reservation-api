@@ -25,18 +25,18 @@ interface SetPosReservationsBody {
 
 export class ReservationsController {
   public static setReservation: ControllerHandler<null> = async (req, res) => {
-    const body: SyncDto = req.body;
+    const { branchId, params, externalBranchId }: SyncDto = req.body;
 
-    if (!body.branchId || !body.params.syncId || !body.params.reservation?.table.length) {
+    if (!branchId || !params.syncId || !params.reservation?.table.length) {
       throw ErrorResponse.MissingRequiredParams();
     }
 
-    if (body.params.reservation.status === 'seated') {
-      const reservation = await ReservationsDB.setReservation(body, '');
+    if (params.reservation.status === 'seated') {
+      const reservation = await ReservationsDB.setReservation(branchId, params, '');
       await AdapterService.getInstance().sendReservation(reservation);
 
-      if (req.user?.role === 'user' && body.externalBranchId) {
-        OntopoService.getInstance().setReservation(body.params, body.externalBranchId);
+      if (req.user?.role === 'user' && externalBranchId) {
+        OntopoService.getInstance().setReservation(externalBranchId, params.syncId, params.syncAt, params.order, params.reservation);
       }
     }
 
@@ -68,7 +68,7 @@ export class ReservationsController {
       const convertedReservations = await ReservationsDB.setReservationsFromPos(branchId, reservations);
       const ontopo = OntopoService.getInstance();
 
-      convertedReservations.forEach((r) => ontopo.setReservation(r, externalBranchId));
+      convertedReservations.forEach((r) => ontopo.setReservation(externalBranchId, r.syncId, r.syncAt, r.order, r.reservation));
     }
 
     if (reservations.length || removed.length || init) {
@@ -88,7 +88,7 @@ export class ReservationsController {
     const result = await ReservationsDB.mergeOrdersToReservations(branchName, orders);
     const ontopo = OntopoService.getInstance();
 
-    result.forEach((r) => ontopo.setReservation(r, externalBranchId));
+    result.forEach((r) => ontopo.setReservation(externalBranchId, r.syncId, r.syncAt, r.order, r.reservation));
 
     res.send(ApiResponse.success(null));
   };

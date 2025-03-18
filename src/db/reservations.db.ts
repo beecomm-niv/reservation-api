@@ -7,8 +7,8 @@ import { ReservationsService } from '../services/reservations.service';
 export class ReservationsDB {
   private static TABLE_NAME = 'reservations';
 
-  public static setReservation = async (sync: SyncDto, branchName: string) => {
-    const reservation = ReservationsService.syncToReservation(sync, branchName);
+  public static setReservation = async (branchId: string, sync: Sync, branchName: string) => {
+    const reservation = ReservationsService.syncToReservation(branchId, sync, branchName);
 
     await DB.getInstance().setItemByKey(ReservationsDB.TABLE_NAME, reservation);
 
@@ -34,7 +34,7 @@ export class ReservationsDB {
     );
 
     const reservations = dbReservations.map<Reservation>((r) =>
-      ReservationsService.syncToReservation({ branchId: r.branchId, params: { syncAt: r.syncAt, syncId: r.syncId, reservation: r.reservation, order: ordersMap[r.syncId] } }, branchName)
+      ReservationsService.syncToReservation(r.branchId, { syncAt: r.syncAt, syncId: r.syncId, order: r.order, reservation: r.reservation }, branchName)
     );
 
     await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);

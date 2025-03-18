@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { Order } from '../models/order.model';
 import { OrderSummery, Reservation, ReservationDto } from '../models/reservation';
-import { SyncDto } from '../models/sync.model';
+import { Sync, SyncDto } from '../models/sync.model';
 
 export class ReservationsService {
   private static RANDOM_PHONE = '0000000000';
@@ -37,20 +37,20 @@ export class ReservationsService {
     return summery;
   };
 
-  public static syncToReservation = (sync: SyncDto, branchName: string): Reservation => {
-    const clientPhone = this.convertPhoneNumber(sync.params.reservation?.patron?.phone || this.RANDOM_PHONE);
-    const clientName = sync.params.reservation?.patron?.name || this.RANDOM_NAME;
+  public static syncToReservation = (branchId: string, sync: Sync, branchName: string): Reservation => {
+    const clientPhone = this.convertPhoneNumber(sync.reservation?.patron?.phone || this.RANDOM_PHONE);
+    const clientName = sync.reservation?.patron?.name || this.RANDOM_NAME;
 
     return {
-      syncId: sync.params.syncId,
-      branchId: sync.branchId,
+      syncId: sync.syncId,
+      branchId,
       clientPhone,
       clientName,
-      orderSummery: this.orderToSummery(sync.params.order, branchName),
-      ts: dayjs(sync.params.syncAt).valueOf(),
-      syncAt: sync.params.syncAt,
-      reservation: sync.params.reservation,
-      order: sync.params.order,
+      orderSummery: this.orderToSummery(sync.order, branchName),
+      ts: dayjs(sync.syncAt).valueOf(),
+      syncAt: sync.syncAt,
+      reservation: sync.reservation,
+      order: sync.order,
     };
   };
 

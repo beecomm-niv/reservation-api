@@ -13,7 +13,7 @@ export interface Sync {
   order?: Order;
 }
 
-interface HostReservation {
+export interface HostReservation {
   reservationId: string;
   createdBy: string | null;
   createdAt: string | null;
