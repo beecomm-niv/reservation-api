@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { Order } from '../models/order.model';
 import { OrderSummery, Reservation, ReservationDto } from '../models/reservation';
-import { Sync, SyncDto } from '../models/sync.model';
+import { Sync } from '../models/sync.model';
 
 export class ReservationsService {
   private static RANDOM_PHONE = '0000000000';

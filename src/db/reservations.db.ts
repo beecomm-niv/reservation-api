@@ -1,4 +1,4 @@
-import { Sync, SyncDto } from '../models/sync.model';
+import { Sync } from '../models/sync.model';
 import { DB } from './db';
 import { Reservation, ReservationDto } from '../models/reservation';
 import { Order } from '../models/order.model';

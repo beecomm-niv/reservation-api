@@ -1,11 +1,5 @@
 import { Order } from './order.model';
 
-export interface SyncDto {
-  branchId: string;
-  externalBranchId?: string;
-  params: Sync;
-}
-
 export interface Sync {
   syncId: string;
   syncAt: string;

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
-import { SyncDto, Sync, HostReservation } from '../models/sync.model';
-import { Order } from '../models/order.model';
+import { Sync } from '../models/sync.model';
+import { Reservation } from '../models/reservation';
 
 export class OntopoService {
   private static instance: OntopoService;
@@ -22,8 +22,14 @@ export class OntopoService {
     return this.instance;
   };
 
-  public setReservation = (branchId: string, sync: Sync) => {
-    this.api.post('/pos/setReservation', sync, {
+  public setReservation = (branchId: string, reservation: Reservation) => {
+    const body: Sync = {
+      syncAt: reservation.syncAt,
+      syncId: reservation.syncId,
+      order: reservation.order,
+      reservation: reservation.reservation,
+    };
+    this.api.post('/pos/setReservation', body, {
       timeout: 10_000,
       headers: {
         'x-api-key': branchId,

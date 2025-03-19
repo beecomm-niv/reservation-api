@@ -4,10 +4,16 @@ import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
 import { Order } from '../models/order.model';
 import { Reservation, ReservationDto } from '../models/reservation';
-import { SyncDto } from '../models/sync.model';
+import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
 import { OntopoService } from '../services/ontopo.service';
 import { RealTimeService } from '../services/realtime.service';
+
+interface SetReservationBody {
+  branchId: string;
+  externalBranchId?: string;
+  params: Sync;
+}
 
 interface MergeOrdersToReservationBody {
   branchName: string;
@@ -25,7 +31,7 @@ interface SetPosReservationsBody {
 
 export class ReservationsController {
   public static setReservation: ControllerHandler<null> = async (req, res) => {
-    const { branchId, params, externalBranchId }: SyncDto = req.body;
+    const { branchId, params, externalBranchId }: SetReservationBody = req.body;
 
     if (!branchId || !params.syncId || !params.reservation?.table.length) {
       throw ErrorResponse.MissingRequiredParams();
@@ -36,7 +42,7 @@ export class ReservationsController {
       await AdapterService.getInstance().sendReservation(reservation);
 
       if (req.user?.role === 'user' && externalBranchId) {
-        OntopoService.getInstance().setReservation(externalBranchId, params);
+        OntopoService.getInstance().setReservation(externalBranchId, reservation);
       }
     }
 
@@ -68,7 +74,7 @@ export class ReservationsController {
       const convertedReservations = await ReservationsDB.setReservationsFromPos(branchId, reservations);
       const ontopo = OntopoService.getInstance();
 
-      convertedReservations.forEach((r) => ontopo.setReservation(externalBranchId, { syncAt: r.syncAt, syncId: r.syncId, order: r.order, reservation: r.reservation }));
+      convertedReservations.forEach((r) => ontopo.setReservation(externalBranchId, r));
     }
 
     if (reservations.length || removed.length || init) {
@@ -88,7 +94,7 @@ export class ReservationsController {
     const result = await ReservationsDB.mergeOrdersToReservations(branchName, orders);
     const ontopo = OntopoService.getInstance();
 
-    result.forEach((r) => ontopo.setReservation(externalBranchId, { syncAt: r.syncAt, syncId: r.syncId, order: r.order, reservation: r.reservation }));
+    result.forEach((r) => ontopo.setReservation(externalBranchId, r));
 
     res.send(ApiResponse.success(null));
   };
