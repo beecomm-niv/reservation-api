@@ -4,8 +4,6 @@ export interface OrderSummery {
   branchName: string;
 
   orderId: number;
-  tables: string[];
-  dinnersCount: number;
   totalOrder: number;
   discount: number;
   service: number;

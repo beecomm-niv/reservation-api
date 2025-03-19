@@ -15,8 +15,6 @@ export class ReservationsService {
     const summery: OrderSummery = {
       branchName,
       orderId: order.orderId,
-      tables: order.tables,
-      dinnersCount: order.dinnersCount,
       discount: order.discount,
       service: order.service,
       totalOrder: 0,
