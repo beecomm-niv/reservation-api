@@ -1,6 +1,6 @@
 import { Sync } from '../models/sync.model';
 import { DB } from './db';
-import { Reservation, ReservationDto } from '../models/reservation';
+import { Reservation } from '../models/reservation';
 import { Order } from '../models/order.model';
 import { ReservationsService } from '../services/reservations.service';
 
@@ -17,28 +17,18 @@ export class ReservationsDB {
 
   public static getReservation = async (syncId: string) => await DB.getInstance().findItemByKey<Reservation>(ReservationsDB.TABLE_NAME, { syncId });
 
-  public static setReservationsFromPos = async (branchId: string, posReservations: ReservationDto[]) => {
-    const reservations = ReservationsService.dtoToReservations(branchId, posReservations);
-
-    await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
-
-    return reservations;
-  };
-
-  public static mergeOrdersToReservations = async (branchName: string, orders: Order[]): Promise<Reservation[]> => {
-    const ordersMap: Partial<Record<string, Order>> = Object.assign({}, ...orders.map((o) => ({ [o.syncId]: o })));
+  public static getReservationsFromOrders = async (branchName: string, orders: Order[]): Promise<Reservation[]> => {
+    const ordersMap: Partial<Record<string, Order>> = Object.assign({}, ...orders.map<Record<string, Order>>((o) => ({ [o.syncId]: o })));
 
     const dbReservations = await DB.getInstance().multiGet<Reservation>(
       this.TABLE_NAME,
       orders.map((r) => ({ syncId: r.syncId }))
     );
 
-    const reservations = dbReservations.map<Reservation>((r) =>
+    return dbReservations.map<Reservation>((r) =>
       ReservationsService.syncToReservation(r.branchId, { syncAt: r.syncAt, syncId: r.syncId, order: ordersMap[r.syncId] || null, reservation: r.reservation }, branchName)
     );
-
-    await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
-
-    return reservations;
   };
+
+  public static writeMultipleReservations = async (reservations: Reservation[]) => await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
 }

@@ -2,15 +2,22 @@ export interface Order {
   id: string;
   syncId: string;
   orderId: number;
-  tableNum: number;
+  tables: string[];
   discount: number;
   service: number;
-  date: string;
+  startDate: string;
+  finishDate: string;
   orderStatus: number;
-  dinners: number;
-  waitress: string;
+  dinnersCount: number;
+  watiress: string;
+  comment: string;
+  duration: number;
+  expected: string;
+  clientPhone: string;
+  clientName: string;
+  isRandom: boolean;
 
-  dishes: Dish[];
+  dishes?: Dish[];
 }
 
 interface Dish {

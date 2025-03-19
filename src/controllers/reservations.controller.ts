@@ -3,7 +3,7 @@ import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
 import { Order } from '../models/order.model';
-import { Reservation, ReservationDto } from '../models/reservation';
+import { Reservation } from '../models/reservation';
 import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
 import { OntopoService } from '../services/ontopo.service';
@@ -11,7 +11,6 @@ import { RealTimeService } from '../services/realtime.service';
 
 interface SetReservationBody {
   branchId: string;
-  externalBranchId?: string;
   params: Sync;
 }
 
@@ -24,14 +23,15 @@ interface MergeOrdersToReservationBody {
 interface SetPosReservationsBody {
   branchId: string;
   externalBranchId: string;
-  reservations?: ReservationDto[];
+  orders?: Order[];
   removed?: number[];
   init?: boolean;
+  branchName?: string;
 }
 
 export class ReservationsController {
   public static setReservation: ControllerHandler<null> = async (req, res) => {
-    const { branchId, params, externalBranchId }: SetReservationBody = req.body;
+    const { branchId, params }: SetReservationBody = req.body;
 
     if (!branchId || !params.syncId || !params.reservation?.table.length) {
       throw ErrorResponse.MissingRequiredParams();
@@ -39,10 +39,9 @@ export class ReservationsController {
 
     if (params.reservation.status === 'seated') {
       const reservation = await ReservationsDB.setReservation(branchId, params, '');
-      await AdapterService.getInstance().sendReservation(reservation);
 
-      if (req.user?.role === 'user' && externalBranchId) {
-        OntopoService.getInstance().setReservation(externalBranchId, reservation);
+      if (!params.order) {
+        await AdapterService.getInstance().sendReservation(reservation);
       }
     }
 
@@ -62,23 +61,24 @@ export class ReservationsController {
   };
 
   public static setPosReservations: ControllerHandler<null> = async (req, res) => {
-    const { branchId, externalBranchId, init, removed, reservations }: SetPosReservationsBody = req.body;
+    const { branchId, externalBranchId, init, removed, orders, branchName }: SetPosReservationsBody = req.body;
 
-    if (!branchId || !reservations || !externalBranchId || !removed) {
+    if (!branchId || !orders || !externalBranchId || !removed || !branchName) {
       throw ErrorResponse.InvalidParams();
     }
 
-    const newReservations = reservations.filter((r) => r.isNew);
+    await RealTimeService.setReservations(branchId, orders, removed, init);
 
-    if (newReservations.length) {
-      const convertedReservations = await ReservationsDB.setReservationsFromPos(branchId, reservations);
+    if (!init && orders.length) {
       const ontopo = OntopoService.getInstance();
 
-      convertedReservations.forEach((r) => ontopo.setReservation(externalBranchId, r));
-    }
+      const reservations = await ReservationsDB.getReservationsFromOrders(
+        branchName,
+        orders.filter((o) => !o.isRandom)
+      );
 
-    if (reservations.length || removed.length || init) {
-      await RealTimeService.setReservations(branchId, reservations, removed, !!init);
+      reservations.forEach((r) => ontopo.setReservation(externalBranchId, r));
+      orders.filter((o) => o.isRandom).forEach((o) => ontopo.setRandomOrder(externalBranchId, o));
     }
 
     res.send(ApiResponse.success(null));
@@ -91,10 +91,12 @@ export class ReservationsController {
       throw ErrorResponse.InvalidParams();
     }
 
-    const result = await ReservationsDB.mergeOrdersToReservations(branchName, orders);
+    const reservations = await ReservationsDB.getReservationsFromOrders(branchName, orders);
+    await ReservationsDB.writeMultipleReservations(reservations);
+
     const ontopo = OntopoService.getInstance();
 
-    result.forEach((r) => ontopo.setReservation(externalBranchId, r));
+    reservations.forEach((r) => ontopo.setReservation(externalBranchId, r));
 
     res.send(ApiResponse.success(null));
   };
