@@ -18,6 +18,8 @@ export class ReservationsDB {
   public static getReservation = async (syncId: string) => await DB.getInstance().findItemByKey<Reservation>(ReservationsDB.TABLE_NAME, { syncId });
 
   public static getReservationsFromOrders = async (branchName: string, orders: Order[]): Promise<Reservation[]> => {
+    if (!orders.length) return [];
+
     const ordersMap: Partial<Record<string, Order>> = Object.assign({}, ...orders.map<Record<string, Order>>((o) => ({ [o.syncId]: o })));
 
     const dbReservations = await DB.getInstance().multiGet<Reservation>(
@@ -30,5 +32,9 @@ export class ReservationsDB {
     );
   };
 
-  public static writeMultipleReservations = async (reservations: Reservation[]) => await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
+  public static writeMultipleReservations = async (reservations: Reservation[]) => {
+    if (reservations.length) {
+      await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
+    }
+  };
 }
