@@ -3,13 +3,15 @@ import { Order } from '../models/order.model';
 import { OrderSummery, Reservation, ReservationDto } from '../models/reservation';
 import { Sync } from '../models/sync.model';
 
+import { v4 } from 'uuid';
+
 export class ReservationsService {
   private static RANDOM_PHONE = '0000000000';
   private static RANDOM_NAME = 'RANDOM';
 
   private static convertPhoneNumber = (phone: string) => phone.replace('+972', '0');
 
-  public static orderToSummery = (order: Order | undefined, branchName: string): OrderSummery | undefined => {
+  public static orderToSummery = (order: Order | null, branchName: string): OrderSummery | undefined => {
     if (!order) return undefined;
 
     const summery: OrderSummery = {
@@ -41,6 +43,10 @@ export class ReservationsService {
     const clientPhone = this.convertPhoneNumber(sync.reservation?.patron?.phone || this.RANDOM_PHONE);
     const clientName = sync.reservation?.patron?.name || this.RANDOM_NAME;
 
+    if (sync.order && !sync.order.id) {
+      sync.order.id = v4();
+    }
+
     return {
       syncId: sync.syncId,
       branchId,
@@ -70,6 +76,7 @@ export class ReservationsService {
         syncId: r.syncId,
         ts: now.valueOf(),
         syncAt: date,
+        order: null,
         reservation: {
           comment: '',
           createdAt: date,
@@ -86,7 +93,7 @@ export class ReservationsService {
             note: '',
             status: 'member',
           },
-          reservationId: r.syncId,
+          reservationId: v4(),
           size: r.dinners,
           stage: 'preOrder',
           status: 'seated',

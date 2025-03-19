@@ -26,7 +26,7 @@ export class ReservationsDB {
   };
 
   public static mergeOrdersToReservations = async (branchName: string, orders: Order[]): Promise<Reservation[]> => {
-    const ordersMap = Object.assign({}, ...orders.map((o) => ({ [o.syncId]: o })));
+    const ordersMap: Partial<Record<string, Order>> = Object.assign({}, ...orders.map((o) => ({ [o.syncId]: o })));
 
     const dbReservations = await DB.getInstance().multiGet<Reservation>(
       this.TABLE_NAME,
@@ -34,7 +34,7 @@ export class ReservationsDB {
     );
 
     const reservations = dbReservations.map<Reservation>((r) =>
-      ReservationsService.syncToReservation(r.branchId, { syncAt: r.syncAt, syncId: r.syncId, order: ordersMap[r.syncId], reservation: r.reservation }, branchName)
+      ReservationsService.syncToReservation(r.branchId, { syncAt: r.syncAt, syncId: r.syncId, order: ordersMap[r.syncId] || null, reservation: r.reservation }, branchName)
     );
 
     await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);

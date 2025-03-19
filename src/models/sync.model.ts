@@ -3,8 +3,8 @@ import { Order } from './order.model';
 export interface Sync {
   syncId: string;
   syncAt: string;
-  reservation?: HostReservation;
-  order?: Order;
+  reservation: HostReservation | null;
+  order: Order | null;
 }
 
 export interface HostReservation {
