@@ -43,10 +43,6 @@ export class ReservationsService {
     const clientPhone = this.convertPhoneNumber(sync.reservation?.patron?.phone || this.RANDOM_PHONE);
     const clientName = sync.reservation?.patron?.name || this.RANDOM_NAME;
 
-    if (sync.order && !sync.order.id) {
-      sync.order.id = v4();
-    }
-
     return {
       syncId: sync.syncId,
       branchId,
@@ -78,6 +74,7 @@ export class ReservationsService {
         syncAt: date,
         order: null,
         reservation: {
+          reservationId: v4(),
           comment: '',
           createdAt: date,
           createdBy: 'beecomm.pos',
@@ -93,7 +90,6 @@ export class ReservationsService {
             note: '',
             status: 'member',
           },
-          reservationId: v4(),
           size: r.dinners,
           stage: 'preOrder',
           status: 'seated',

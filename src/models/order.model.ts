@@ -1,5 +1,5 @@
 export interface Order {
-  id?: string;
+  id: string;
   syncId: string;
   orderId: number;
   tableNum: number;
