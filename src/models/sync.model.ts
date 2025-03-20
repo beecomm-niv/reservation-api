@@ -1,13 +1,15 @@
-import { Order } from './order.model';
+import { OrderDto } from './order.model';
 
-export interface Sync {
+export interface ISync<T> {
   syncId: string;
   syncAt: string;
-  reservation: HostReservation | null;
-  order: Order | null;
+  reservation: Booking | null;
+  order: T | null;
 }
 
-export interface HostReservation {
+export interface Sync extends ISync<OrderDto> {}
+
+export interface Booking {
   reservationId: string;
   createdBy: string | null;
   createdAt: string | null;
