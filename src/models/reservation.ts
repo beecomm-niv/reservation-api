@@ -9,6 +9,9 @@ export interface Reservation extends ISync<Order> {
 
 export interface ReservationDto {
   syncId: string;
+
   tableNum: number;
   dinnersCount: number;
+  comment: string;
+  isRandom: boolean;
 }

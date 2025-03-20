@@ -4,7 +4,6 @@ import { Reservation, ReservationDto } from '../models/reservation';
 interface SendReservationBody {
   branchId: string;
   reservation: ReservationDto;
-  comment: string;
 }
 
 export class AdapterService {
@@ -32,11 +31,12 @@ export class AdapterService {
   public sendReservation = (branchId: string, reservation: Reservation) => {
     const body: SendReservationBody = {
       branchId,
-      comment: reservation.reservation?.patron?.name || '',
       reservation: {
         syncId: reservation.syncId,
         dinnersCount: reservation.reservation?.size || 1,
         tableNum: +(reservation.reservation?.table[0] || -1),
+        comment: reservation.reservation?.patron?.name || '',
+        isRandom: !!reservation.order?.orderInfo.isRandom,
       },
     };
 
