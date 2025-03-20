@@ -4,6 +4,7 @@ import { ControllerHandler } from '../models/controller-handler.model';
 import { ErrorResponse } from '../models/error-response.model';
 import { OrderDto } from '../models/order.model';
 import { Sync } from '../models/sync.model';
+import { AdapterService } from '../services/adapter.service';
 import { OntopoService } from '../services/ontopo.service';
 import { RealTimeService } from '../services/realtime.service';
 
@@ -36,9 +37,11 @@ export class ReservationsController {
       throw ErrorResponse.InvalidParams();
     }
 
-    await ReservationsDB.saveReservationFromSync(branchId, params);
+    const reservation = await ReservationsDB.saveReservationFromSync(branchId, params);
 
-    // TODO: send "seated" reservations to the pos from the adapter service
+    if (reservation.reservation?.status === 'seated') {
+      AdapterService.getInstance().sendReservation(branchId, reservation);
+    }
 
     res.send(ApiResponse.success(undefined));
   };
