@@ -6,8 +6,6 @@ const router = Router();
 
 router.post('/', AuthController.verify('user', true, 'sync'), ReservationsController.setReservation);
 
-router.post('/pos/watch', AuthController.verify('super_admin', true, 'pos-sync'), ReservationsController.posWatch);
-
-router.post('/pos/orders', AuthController.verify('super_admin', true, 'pos-sync'), ReservationsController.finishPosOrders);
+router.post('/pos', AuthController.verify('super_admin', true, 'pos-sync'), ReservationsController.posWatch);
 
 export const reservationsRouter = router;

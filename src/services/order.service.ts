@@ -15,7 +15,7 @@ export class OrderService {
         toDate: orderDto.toDate,
         totalOrder: orderDto.totalOrder,
         waitress: orderDto.waitress,
-        isRandom: orderDto.isRandom,
+        openFromPos: orderDto.openFromPos,
       },
 
       dishes: orderDto.dishes,

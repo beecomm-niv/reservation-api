@@ -1,10 +1,17 @@
 import { database } from 'firebase-admin';
-import { OrderDto } from '../models/order.model';
+import { OrderDto, OrderStatus } from '../models/order.model';
 
 export class RealTimeService {
-  public static setOrders = async (branchId: string, orders: OrderDto[], removed: number[], init: boolean) => {
-    const data: Record<number, OrderDto | null> = Object.assign({}, ...orders.map<Record<number, OrderDto>>((o) => ({ [o.orderId]: o })));
-    removed.forEach((i) => (data[i] = null));
+  public static setOrders = async (branchId: string, orders: OrderDto[], init: boolean) => {
+    const data: Record<string, OrderDto | null> = {};
+
+    orders.forEach((o) => {
+      if (o.orderStatus === OrderStatus.CANCEL || o.orderStatus === OrderStatus.CLOSED) {
+        data[o.syncId] = null;
+      } else {
+        data[o.syncId] = o;
+      }
+    });
 
     const path = `${branchId}/orders/`;
 

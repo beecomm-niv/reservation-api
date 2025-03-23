@@ -1,5 +1,5 @@
 import { Order } from './order.model';
-import { ISync } from './sync.model';
+import { ISync, PatronStatus } from './sync.model';
 
 export interface Reservation extends ISync<Order> {
   branchId: string;
@@ -13,5 +13,8 @@ export interface ReservationDto {
   tableNum: number;
   dinnersCount: number;
   comment: string;
-  isRandom: boolean;
+  openFromPos: boolean;
+  clientName: string;
+  clientPhone: string;
+  patronStatus: PatronStatus;
 }

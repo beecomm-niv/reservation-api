@@ -1,3 +1,5 @@
+import { ReservationStage, ReservationStatus } from './sync.model';
+
 export interface OrderDto extends OrderInfo {
   id: string;
   syncId: string;
@@ -5,6 +7,9 @@ export interface OrderDto extends OrderInfo {
   dinnersCount: number;
   duration: number;
   expected: string;
+
+  isNew: boolean;
+  stage: ReservationStage;
 
   dishes?: Dish[];
 }
@@ -24,7 +29,7 @@ interface OrderInfo {
   service: number;
   orderStatus: OrderStatus;
   totalOrder: number;
-  isRandom: boolean;
+  openFromPos: boolean;
 }
 
 interface Dish {
@@ -39,7 +44,7 @@ interface Dish {
   toppings: Dish[];
 }
 
-enum OrderStatus {
+export enum OrderStatus {
   OPEN,
   CANCEL,
   CLOSED,

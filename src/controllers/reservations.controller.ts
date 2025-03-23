@@ -18,15 +18,7 @@ interface WatchPosBody {
   externalBranchId: string;
 
   orders: OrderDto[];
-  removed: number[];
   init: boolean;
-}
-
-interface FinishOrdersBody {
-  branchId: string;
-  externalBranchId: string;
-
-  orders: OrderDto[];
 }
 
 export class ReservationsController {
@@ -40,40 +32,30 @@ export class ReservationsController {
     const reservation = await ReservationsDB.saveReservationFromSync(branchId, params);
 
     if (reservation.reservation?.status === 'seated') {
-      AdapterService.getInstance().sendReservation(branchId, reservation);
+      AdapterService.getInstance().sendReservation(reservation); // TODO: response with adapter response
     }
 
     res.send(ApiResponse.success(undefined));
   };
 
   public static posWatch: ControllerHandler<undefined> = async (req, res) => {
-    const { branchId, externalBranchId, init, orders, removed }: Partial<WatchPosBody> = req.body;
+    const { branchId, externalBranchId, orders, init }: WatchPosBody = req.body;
 
-    if (!branchId || !externalBranchId || !orders || !removed) {
+    if (!branchId || !externalBranchId || !orders) {
       throw ErrorResponse.InvalidParams();
     }
 
-    await RealTimeService.setOrders(branchId, orders, removed, Boolean(init));
+    RealTimeService.setOrders(branchId, orders, init);
 
     if (!init && orders.length) {
-      const reservations = await ReservationsDB.getReservations(orders.map((o) => o.syncId));
-      OntopoService.getInstance().setOrders(externalBranchId, reservations, orders);
+      const activeOrders = orders.filter((o) => !o.isNew);
+      const newOrders = orders.filter((o) => o.isNew);
+
+      const reservations = await ReservationsDB.getReservations(activeOrders.map((o) => o.syncId));
+
+      ReservationsDB.mergeAndSaveOrders(reservations, activeOrders);
+      OntopoService.getInstance().setOrders(externalBranchId, reservations, activeOrders, newOrders);
     }
-
-    res.send(ApiResponse.success(undefined));
-  };
-
-  public static finishPosOrders: ControllerHandler<undefined> = async (req, res) => {
-    const { branchId, externalBranchId, orders }: FinishOrdersBody = req.body;
-
-    if (!branchId || !externalBranchId || !orders.length) {
-      throw ErrorResponse.InvalidParams();
-    }
-
-    const reservations = await ReservationsDB.getReservations(orders.map((o) => o.syncId));
-
-    await ReservationsDB.finishOrders(reservations, orders);
-    OntopoService.getInstance().setOrders(externalBranchId, reservations, orders);
 
     res.send(ApiResponse.success(undefined));
   };

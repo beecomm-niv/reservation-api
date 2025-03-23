@@ -33,11 +33,8 @@ export class OntopoService {
     });
   };
 
-  public setOrders = async (branchId: string, reservations: Reservation[], orders: OrderDto[]) => {
-    const activeOrders = orders.filter((o) => !o.isRandom);
-    const newOrders = orders.filter((o) => o.isRandom);
-
-    const syncs = await SyncService.getSyncFromOrdersAndReservations(reservations, activeOrders, newOrders);
+  public setOrders = async (branchId: string, reservations: Reservation[], activeOrders: OrderDto[], newOrders: OrderDto[]) => {
+    const syncs = SyncService.getSyncFromOrdersAndReservations(reservations, activeOrders, newOrders);
 
     syncs.forEach((s) => this.sendSync(branchId, s));
   };

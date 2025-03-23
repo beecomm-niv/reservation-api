@@ -3,6 +3,7 @@ import { Reservation } from '../models/reservation';
 import { Sync } from '../models/sync.model';
 import { OrderService } from '../services/order.service';
 import { ReservationsService } from '../services/reservations.service';
+import { UtilsService } from '../services/utils.service';
 import { DB } from './db';
 
 export class ReservationsDB {
@@ -16,21 +17,16 @@ export class ReservationsDB {
     return reservation;
   };
 
-  public static getReservations = async (syncs: string[]): Promise<Reservation[]> => {
-    if (!syncs.length) return [];
-
-    return await DB.getInstance().multiGet<Reservation>(
+  public static getReservations = async (syncs: string[]) =>
+    await DB.getInstance().multiGet<Reservation>(
       this.TABLE_NAME,
       syncs.map((syncId) => ({ syncId }))
     );
-  };
 
-  public static finishOrders = async (reservations: Reservation[], orders: OrderDto[]) => {
-    const ordersMap: Record<string, OrderDto> = Object.assign({}, ...orders.map<Record<string, OrderDto>>((o) => ({ [o.syncId]: o })));
+  public static mergeAndSaveOrders = (reservations: Reservation[], orders: OrderDto[]) => {
+    const ordersMap = UtilsService.listToMap(orders, (o) => o.syncId);
+    const data = reservations.map<Reservation>((r) => ({ ...r, order: OrderService.dtoToOrder(ordersMap[r.syncId]) }));
 
-    await DB.getInstance().multiWrite<Reservation>(
-      this.TABLE_NAME,
-      reservations.map((r) => ({ ...r, order: OrderService.dtoToOrder(ordersMap[r.syncId]) }))
-    );
+    DB.getInstance().multiWrite(this.TABLE_NAME, data);
   };
 }

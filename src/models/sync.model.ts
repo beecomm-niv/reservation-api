@@ -34,10 +34,10 @@ interface Patron {
   note: string | null;
 }
 
-type ReservationStatus = 'done' | 'deleted' | 'noShow' | 'canceled' | 'seated' | 'approved' | 'standby' | 'invited' | 'callback' | 'empty' | 'queue';
+export type ReservationStatus = 'done' | 'deleted' | 'noShow' | 'canceled' | 'seated' | 'approved' | 'standby' | 'invited' | 'callback' | 'empty' | 'queue';
 
-type CreditCardStatus = 'waiting' | 'manualVerified' | 'notVerified' | 'verified';
+export type CreditCardStatus = 'waiting' | 'manualVerified' | 'notVerified' | 'verified';
 
-type ReservationStage = 'preOrder' | 'ordered' | 'starters' | 'main' | 'dessert' | 'check' | 'paid' | 'done';
+export type ReservationStage = 'preOrder' | 'ordered' | 'starters' | 'main' | 'dessert' | 'check' | 'paid' | 'done';
 
 export type PatronStatus = 'visitor' | 'member' | 'returning' | 'problematic' | 'vip';

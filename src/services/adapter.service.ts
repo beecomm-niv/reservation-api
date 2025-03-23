@@ -29,19 +29,22 @@ export class AdapterService {
     return this.instance;
   };
 
-  public sendReservation = (branchId: string, reservation: Reservation) => {
-    if (!reservation.reservation?.table.length) {
+  public sendReservation = ({ branchId, reservation, order, syncId }: Reservation) => {
+    if (!reservation?.table.length) {
       throw ErrorResponse.InvalidParams();
     }
 
     const body: SendReservationBody = {
       branchId,
       reservation: {
-        syncId: reservation.syncId,
-        dinnersCount: reservation.reservation?.size || 1,
-        tableNum: +reservation.reservation.table[0],
-        comment: reservation.reservation?.patron?.name || '',
-        isRandom: !!reservation.order?.orderInfo.isRandom,
+        clientName: reservation?.patron?.name || '',
+        clientPhone: reservation?.patron?.phone || '',
+        comment: reservation.patron?.name || '',
+        dinnersCount: reservation.size || 1,
+        openFromPos: order?.orderInfo.openFromPos || false,
+        patronStatus: reservation.patron?.status || 'member',
+        syncId,
+        tableNum: +reservation.table[0],
       },
     };
 
