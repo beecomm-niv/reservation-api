@@ -1,8 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { OrderDto } from '../models/order.model';
 import { Sync } from '../models/sync.model';
-import { SyncService } from './sync.service';
-import { Reservation } from '../models/reservation';
+import dayjs from 'dayjs';
 
 export class OntopoService {
   private static instance: OntopoService;
@@ -33,9 +32,14 @@ export class OntopoService {
     });
   };
 
-  public setOrders = async (branchId: string, reservations: Reservation[], activeOrders: OrderDto[], newOrders: OrderDto[]) => {
-    const syncs = SyncService.getSyncFromOrdersAndReservations(reservations, activeOrders, newOrders);
+  public setOrders = async (branchId: string, syncs: Sync[], newOrders: OrderDto[]) => {
+    const newSyncs = newOrders.map<Sync>((o) => ({
+      syncId: o.syncId,
+      reservation: null,
+      order: o,
+      syncAt: dayjs().utc().format(),
+    }));
 
-    syncs.forEach((s) => this.sendSync(branchId, s));
+    syncs.concat(newSyncs).forEach((s) => this.sendSync(branchId, s));
   };
 }

@@ -1,11 +1,14 @@
-import { Order } from './order.model';
+import { Dish, OrderInfo } from './order.model';
 import { ISync, PatronStatus } from './sync.model';
 
-export interface Reservation extends ISync<Order> {
+export type Reservation = ISync & {
   branchId: string;
   clientPhone: string;
   ts: number;
-}
+
+  orderInfo: OrderInfo | null;
+  dishes: Dish[] | null;
+};
 
 export interface ReservationDto {
   syncId: string;

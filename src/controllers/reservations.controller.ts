@@ -51,10 +51,10 @@ export class ReservationsController {
       const activeOrders = orders.filter((o) => !o.isNew);
       const newOrders = orders.filter((o) => o.isNew);
 
-      const reservations = await ReservationsDB.getReservations(activeOrders.map((o) => o.syncId));
+      const syncs = await ReservationsDB.getAndMergeSyncsFromOrders(activeOrders);
 
-      ReservationsDB.mergeAndSaveOrders(reservations, activeOrders);
-      OntopoService.getInstance().setOrders(externalBranchId, reservations, activeOrders, newOrders);
+      ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs);
+      OntopoService.getInstance().setOrders(externalBranchId, syncs, newOrders);
     }
 
     res.send(ApiResponse.success(undefined));

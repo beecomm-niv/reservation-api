@@ -14,12 +14,7 @@ export interface OrderDto extends OrderInfo {
   dishes?: Dish[];
 }
 
-export interface Order {
-  orderInfo: OrderInfo;
-  dishes?: Dish[];
-}
-
-interface OrderInfo {
+export interface OrderInfo {
   orderId: number;
   waitress: string;
   comment: string;
@@ -32,7 +27,7 @@ interface OrderInfo {
   openFromPos: boolean;
 }
 
-interface Dish {
+export interface Dish {
   name: string;
   dishId: number;
   netId: string;

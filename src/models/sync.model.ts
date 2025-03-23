@@ -1,13 +1,14 @@
 import { OrderDto } from './order.model';
 
-export interface ISync<T> {
+export interface ISync {
   syncId: string;
   syncAt: string;
   reservation: Booking | null;
-  order: T | null;
 }
 
-export interface Sync extends ISync<OrderDto> {}
+export type Sync = ISync & {
+  order: OrderDto | null;
+};
 
 export interface Booking {
   reservationId: string;

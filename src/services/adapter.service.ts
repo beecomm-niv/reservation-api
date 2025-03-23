@@ -36,7 +36,7 @@ export class AdapterService {
     return this.instance;
   };
 
-  public sendReservation = async ({ branchId, reservation, order, syncId }: Reservation) => {
+  public sendReservation = async ({ branchId, reservation, orderInfo, syncId }: Reservation) => {
     if (!reservation?.table.length) {
       throw ErrorResponse.InvalidParams();
     }
@@ -48,7 +48,7 @@ export class AdapterService {
         clientPhone: reservation?.patron?.phone || '',
         comment: reservation.patron?.name || '',
         dinnersCount: reservation.size || 1,
-        openFromPos: order?.orderInfo.openFromPos || false,
+        openFromPos: orderInfo?.openFromPos || false,
         patronStatus: reservation.patron?.status || 'visitor',
         syncId,
         tableNum: +reservation.table[0],
