@@ -1,4 +1,4 @@
-import { ReservationStage, ReservationStatus } from './sync.model';
+import { ReservationStage } from './sync.model';
 
 export interface OrderDto extends OrderInfo {
   id: string;

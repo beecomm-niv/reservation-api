@@ -16,4 +16,5 @@ export class ErrorResponse extends Error {
   public static BadEmailOrPassword = () => new ErrorResponse(1005, 'Invalid email or password');
   public static EmailAlradyExist = () => new ErrorResponse(1006, 'Email already exists');
   public static InvalidExpression = () => new ErrorResponse(1007, 'Invalid expression');
+  public static FaildToHandleNewSync = (message: string) => new ErrorResponse(1008, 'Faild to handle new sync. message: ' + message);
 }

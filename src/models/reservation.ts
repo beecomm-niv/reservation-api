@@ -10,6 +10,7 @@ export interface Reservation extends ISync<Order> {
 export interface ReservationDto {
   syncId: string;
 
+  duration: number;
   tableNum: number;
   dinnersCount: number;
   comment: string;

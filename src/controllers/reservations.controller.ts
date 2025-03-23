@@ -32,7 +32,7 @@ export class ReservationsController {
     const reservation = await ReservationsDB.saveReservationFromSync(branchId, params);
 
     if (reservation.reservation?.status === 'seated') {
-      AdapterService.getInstance().sendReservation(reservation); // TODO: response with adapter response
+      await AdapterService.getInstance().sendReservation(reservation);
     }
 
     res.send(ApiResponse.success(undefined));
