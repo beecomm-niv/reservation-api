@@ -17,13 +17,18 @@ export class ReservationsDB {
     return reservation;
   };
 
-  public static getReservations = async (syncs: string[]) =>
-    await DB.getInstance().multiGet<Reservation>(
+  public static getReservations = async (syncs: string[]) => {
+    if (!syncs.length) return [];
+
+    return await DB.getInstance().multiGet<Reservation>(
       this.TABLE_NAME,
       syncs.map((syncId) => ({ syncId }))
     );
+  };
 
   public static mergeAndSaveOrders = (reservations: Reservation[], orders: OrderDto[]) => {
+    if (!reservations.length) return;
+
     const ordersMap = UtilsService.listToMap(orders, (o) => o.syncId);
     const data = reservations.map<Reservation>((r) => ({ ...r, order: OrderService.dtoToOrder(ordersMap[r.syncId]) }));
 
