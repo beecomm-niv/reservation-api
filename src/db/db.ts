@@ -2,6 +2,14 @@ import { BatchGetCommand, BatchWriteCommand, DynamoDBDocumentClient, GetCommand,
 import { ErrorResponse } from '../models/error-response.model';
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 
+interface Config {
+  region: string;
+  credentials?: {
+    accessKeyId: string;
+    secretAccessKey: string;
+  };
+}
+
 interface Expressions<T> {
   expression: keyof T;
   alias: string;
@@ -19,21 +27,30 @@ export class DB {
   public client: DynamoDBDocumentClient;
 
   constructor() {
-    this.client = DynamoDBDocumentClient.from(
-      new DynamoDBClient({
-        region: 'il-central-1',
-        credentials: {
-          accessKeyId: process.env.AWS_ACCESS_KEY || '',
-          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-        },
-      }),
-      {
-        marshallOptions: {
-          removeUndefinedValues: true,
-        },
-      }
-    );
+    this.client = DynamoDBDocumentClient.from(new DynamoDBClient(DB.dbConfigFactory()), {
+      marshallOptions: {
+        removeUndefinedValues: true,
+      },
+    });
   }
+
+  private static dbConfigFactory = (): Config => {
+    const accessKeyId = process.env.AWS_ACCESS_KEY;
+    const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+    const config: Config = {
+      region: 'il-central-1',
+    };
+
+    if (accessKeyId && secretAccessKey) {
+      config.credentials = {
+        accessKeyId,
+        secretAccessKey,
+      };
+    }
+
+    return config;
+  };
 
   public static getInstance = () => {
     if (!this.instance) {
