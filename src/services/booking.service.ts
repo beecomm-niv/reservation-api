@@ -6,6 +6,8 @@ export class BookingService {
     switch (orderStatus) {
       case OrderStatus.CANCEL:
         return 'canceled';
+      case OrderStatus.CLOSED:
+        return 'done';
       default:
         return 'seated';
     }
