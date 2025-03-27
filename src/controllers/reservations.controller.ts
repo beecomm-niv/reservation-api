@@ -49,7 +49,7 @@ export class ReservationsController {
 
     RealTimeService.setOrders(branchId, orders, init);
 
-    if (!init && orders.length) {
+    if (orders.length) {
       const activeOrders = orders.filter((o) => !o.isNew);
       const newOrders = orders.filter((o) => o.isNew);
 
