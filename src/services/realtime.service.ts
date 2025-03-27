@@ -1,8 +1,9 @@
 import { database } from 'firebase-admin';
 import { OrderDto, OrderStatus } from '../models/order.model';
+import { Sync } from '../models/sync.model';
 
 export class RealTimeService {
-  public static setOrders = async (branchId: string, orders: OrderDto[], init: boolean) => {
+  public static setOrders = (branchId: string, orders: OrderDto[], init: boolean) => {
     const data: Record<string, OrderDto | null> = {};
 
     orders.forEach((o) => {
@@ -16,9 +17,29 @@ export class RealTimeService {
     const path = `${branchId}/orders/`;
 
     if (init) {
-      await database().ref(path).set(data);
+      database().ref(path).set(data);
     } else {
-      await database().ref(path).update(data);
+      database().ref(path).update(data);
+    }
+  };
+
+  public static endReservations = (branchId: string, orders: OrderDto[]) => {
+    const data: Record<string, null> = {};
+    orders.filter((o) => o.orderStatus === OrderStatus.CLOSED || o.orderStatus === OrderStatus.CANCEL).forEach((o) => (data[o.syncId] = null));
+
+    if (!Object.keys(data).length) return;
+
+    const path = `${branchId}/reservations/`;
+    database().ref(path).update(data);
+  };
+
+  public static setReservation = (branchId: string, sync: Sync) => {
+    const path = `${branchId}/reservations/${sync.syncId}`;
+
+    if (sync.reservation?.status === 'canceled') {
+      database().ref(path).remove();
+    } else {
+      database().ref(path).set(sync);
     }
   };
 }

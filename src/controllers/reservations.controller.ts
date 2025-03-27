@@ -35,6 +35,8 @@ export class ReservationsController {
       await AdapterService.getInstance().sendReservation(reservation);
     }
 
+    RealTimeService.setReservation(branchId, params);
+
     res.send(ApiResponse.success(undefined));
   };
 
@@ -55,6 +57,7 @@ export class ReservationsController {
 
       ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs);
       OntopoService.getInstance().setOrders(externalBranchId, syncs, newOrders);
+      RealTimeService.endReservations(branchId, orders);
     }
 
     res.send(ApiResponse.success(undefined));
