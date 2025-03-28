@@ -21,8 +21,8 @@ export class OntopoService {
     return this.instance;
   };
 
-  private sendSync = (branchId: string, sync: Sync) => {
-    this.api.post('/pos/setReservation', sync, {
+  private sendSync = async (branchId: string, sync: Sync) => {
+    await this.api.post('/pos/setReservation', sync, {
       timeout: 10_000,
       headers: {
         'x-api-key': branchId,
@@ -31,6 +31,8 @@ export class OntopoService {
   };
 
   public setReservations = async (branchId: string, syncs: Sync[]) => {
-    syncs.forEach((s) => this.sendSync(branchId, s));
+    const promises: Promise<void>[] = syncs.map((s) => this.sendSync(branchId, s));
+
+    await Promise.all(promises);
   };
 }

@@ -37,7 +37,7 @@ export class ReservationsController {
       await AdapterService.getInstance().sendReservation(reservation);
     }
 
-    RealTimeService.setReservations(branchId, [params]);
+    RealTimeService.setReservations(branchId, [params]).catch(() => {});
 
     res.send(ApiResponse.success(undefined));
   };
@@ -51,15 +51,17 @@ export class ReservationsController {
 
     const syncs = await ReservationsDB.getAndMergeSyncsFromOrders(orders.filter((o) => !o.isNew));
 
-    ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs);
+    ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs).catch(() => {});
 
     const fullSyncs = SyncService.syncFromNewOrders(orders.filter((o) => o.isNew)).concat(syncs);
 
     if (!finishedOrders) {
-      RealTimeService.setReservations(branchId, fullSyncs, init);
+      RealTimeService.setReservations(branchId, fullSyncs, init).catch(() => {});
     }
 
-    OntopoService.getInstance().setReservations(externalBranchId, fullSyncs);
+    OntopoService.getInstance()
+      .setReservations(externalBranchId, fullSyncs)
+      .catch(() => {});
 
     res.send(ApiResponse.success(undefined));
   };

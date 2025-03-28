@@ -35,10 +35,10 @@ export class ReservationsDB {
     }));
   };
 
-  public static saveMultiReservationsFromSyncs = (branchId: string, syncs: Sync[]) => {
+  public static saveMultiReservationsFromSyncs = async (branchId: string, syncs: Sync[]) => {
     if (!syncs.length) return;
 
-    DB.getInstance().multiWrite(
+    await DB.getInstance().multiWrite(
       this.TABLE_NAME,
       syncs.map<Reservation>((s) => ReservationsService.syncToReservation(branchId, s))
     );
