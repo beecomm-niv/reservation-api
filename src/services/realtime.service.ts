@@ -1,45 +1,31 @@
 import { database } from 'firebase-admin';
 import { OrderDto, OrderStatus } from '../models/order.model';
-import { Sync } from '../models/sync.model';
+import { Booking, Sync } from '../models/sync.model';
 
 export class RealTimeService {
-  public static setOrders = (branchId: string, orders: OrderDto[], init: boolean) => {
-    const data: Record<string, OrderDto | null> = {};
+  private static readonly RESERVATIONS_PATH = 'reservations';
+  private static readonly ORDERS_PATH = 'orders';
 
-    orders.forEach((o) => {
-      if (o.orderStatus === OrderStatus.CANCEL || o.orderStatus === OrderStatus.CLOSED) {
-        data[o.syncId] = null;
-      } else {
-        data[o.syncId] = o;
+  public static setReservations = async (branchId: string, syncs: Sync[], init?: boolean) => {
+    const updates: Record<string, Booking | OrderDto | null> = {};
+
+    syncs.forEach((s) => {
+      if (s.reservation) {
+        updates[`/${this.RESERVATIONS_PATH}/${s.syncId}`] = s.reservation;
+      }
+
+      if (s.order) {
+        const isClosed = s.order.orderStatus === OrderStatus.CANCEL || s.order.orderStatus === OrderStatus.CLOSED;
+        updates[`/${this.ORDERS_PATH}/${s.syncId}`] = isClosed ? null : s.order;
       }
     });
 
-    const path = `${branchId}/orders/`;
-
     if (init) {
-      database().ref(path).set(data);
-    } else {
-      database().ref(path).update(data);
+      await database().ref(`/${branchId}/${this.ORDERS_PATH}`).remove();
     }
-  };
 
-  public static endReservations = (branchId: string, orders: OrderDto[]) => {
-    const data: Record<string, null> = {};
-    orders.filter((o) => o.orderStatus === OrderStatus.CLOSED || o.orderStatus === OrderStatus.CANCEL).forEach((o) => (data[o.syncId] = null));
-
-    if (!Object.keys(data).length) return;
-
-    const path = `${branchId}/reservations/`;
-    database().ref(path).update(data);
-  };
-
-  public static setReservation = (branchId: string, sync: Sync) => {
-    const path = `${branchId}/reservations/${sync.syncId}`;
-
-    if (sync.reservation?.status === 'canceled') {
-      database().ref(path).remove();
-    } else {
-      database().ref(path).set(sync);
+    if (Object.keys(updates).length) {
+      database().ref(branchId).update(updates);
     }
   };
 }

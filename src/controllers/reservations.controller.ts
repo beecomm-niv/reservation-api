@@ -7,6 +7,7 @@ import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
 import { OntopoService } from '../services/ontopo.service';
 import { RealTimeService } from '../services/realtime.service';
+import { SyncService } from '../services/sync.service';
 
 interface SetReservationBody {
   branchId: string;
@@ -19,6 +20,7 @@ interface WatchPosBody {
 
   orders: OrderDto[];
   init: boolean;
+  finishedOrders: boolean;
 }
 
 export class ReservationsController {
@@ -35,30 +37,29 @@ export class ReservationsController {
       await AdapterService.getInstance().sendReservation(reservation);
     }
 
-    RealTimeService.setReservation(branchId, params);
+    RealTimeService.setReservations(branchId, [params]);
 
     res.send(ApiResponse.success(undefined));
   };
 
   public static posWatch: ControllerHandler<undefined> = async (req, res) => {
-    const { branchId, externalBranchId, orders, init }: WatchPosBody = req.body;
+    const { branchId, externalBranchId, orders, init, finishedOrders }: WatchPosBody = req.body;
 
     if (!branchId || !externalBranchId || !orders) {
       throw ErrorResponse.InvalidParams();
     }
 
-    RealTimeService.setOrders(branchId, orders, init);
+    const syncs = await ReservationsDB.getAndMergeSyncsFromOrders(orders.filter((o) => !o.isNew));
 
-    if (orders.length) {
-      const activeOrders = orders.filter((o) => !o.isNew);
-      const newOrders = orders.filter((o) => o.isNew);
+    ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs);
 
-      const syncs = await ReservationsDB.getAndMergeSyncsFromOrders(activeOrders);
+    const fullSyncs = SyncService.syncFromNewOrders(orders.filter((o) => o.isNew)).concat(syncs);
 
-      ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs);
-      OntopoService.getInstance().setOrders(externalBranchId, syncs, newOrders);
-      RealTimeService.endReservations(branchId, orders);
+    if (!finishedOrders) {
+      RealTimeService.setReservations(branchId, fullSyncs, init);
     }
+
+    OntopoService.getInstance().setReservations(externalBranchId, fullSyncs);
 
     res.send(ApiResponse.success(undefined));
   };
