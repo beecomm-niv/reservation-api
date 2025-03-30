@@ -1,17 +1,17 @@
 import { database } from 'firebase-admin';
 import { OrderDto, OrderStatus } from '../models/order.model';
-import { Booking, Sync } from '../models/sync.model';
+import { Sync } from '../models/sync.model';
 
 export class RealTimeService {
   private static readonly RESERVATIONS_PATH = 'reservations';
   private static readonly ORDERS_PATH = 'orders';
 
   public static setReservations = async (branchId: string, syncs: Sync[], init?: boolean) => {
-    const updates: Record<string, Booking | OrderDto | null> = {};
+    const updates: Record<string, Sync | OrderDto | null> = {};
 
     syncs.forEach((s) => {
       if (s.reservation) {
-        updates[`/${this.RESERVATIONS_PATH}/${s.syncId}`] = s.reservation;
+        updates[`/${this.RESERVATIONS_PATH}/${s.syncId}`] = { ...s, order: null } as Sync;
       }
 
       if (s.order) {
