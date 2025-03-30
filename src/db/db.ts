@@ -151,6 +151,8 @@ export class DB {
   };
 
   public multiGet = async <T>(tableName: string, keys: Record<string, any>[]) => {
+    if (!keys.length) return [];
+
     const response = await this.client.send(
       new BatchGetCommand({
         RequestItems: {

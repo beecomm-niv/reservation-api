@@ -17,7 +17,6 @@ export interface ReservationDto {
   tableNum: number;
   dinnersCount: number;
   comment: string;
-  openFromPos: boolean;
   clientName: string;
   clientPhone: string;
   patronStatus: PatronStatus;

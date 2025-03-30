@@ -18,8 +18,6 @@ export class ReservationsDB {
   };
 
   public static getAndMergeSyncsFromOrders = async (orders: OrderDto[]): Promise<Sync[]> => {
-    if (!orders.length) return [];
-
     const ordersMap = UtilsService.listToMap(orders, (o) => o.syncId);
 
     const reservations = await DB.getInstance().multiGet<Reservation>(
@@ -36,8 +34,6 @@ export class ReservationsDB {
   };
 
   public static saveMultiReservationsFromSyncs = async (branchId: string, syncs: Sync[]) => {
-    if (!syncs.length) return;
-
     await DB.getInstance().multiWrite(
       this.TABLE_NAME,
       syncs.map<Reservation>((s) => ReservationsService.syncToReservation(branchId, s))

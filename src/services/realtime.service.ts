@@ -16,7 +16,7 @@ export class RealTimeService {
 
       if (s.order) {
         const isClosed = s.order.orderStatus === OrderStatus.CANCEL || s.order.orderStatus === OrderStatus.CLOSED;
-        updates[`/${this.ORDERS_PATH}/${s.syncId}`] = isClosed ? null : s.order;
+        updates[`/${this.ORDERS_PATH}/${s.order.orderId}`] = isClosed ? null : s.order;
       }
     });
 

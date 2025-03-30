@@ -24,20 +24,25 @@ interface WatchPosBody {
 }
 
 export class ReservationsController {
-  public static setReservation: ControllerHandler<undefined> = async (req, res) => {
+  public static setReservation: ControllerHandler<Sync | undefined> = async (req, res) => {
     const { branchId, params }: Partial<SetReservationBody> = req.body;
 
     if (!branchId || !params || !params.reservation?.table.length) {
       throw ErrorResponse.InvalidParams();
     }
 
-    const reservation = await ReservationsDB.saveReservationFromSync(branchId, params);
+    const sendToPos = params.reservation.status === 'seated';
 
-    if (reservation.reservation?.status === 'seated') {
-      await AdapterService.getInstance().sendReservation(reservation);
+    if (sendToPos) {
+      params.order = await AdapterService.getInstance().sendReservation(branchId, params);
     }
 
-    RealTimeService.setReservations(branchId, [params]).catch(() => {});
+    ReservationsDB.saveReservationFromSync(branchId, params).catch((e) => this.handleError('ReservationsDB.saveReservationFromSync', e));
+    RealTimeService.setReservations(branchId, [params]).catch((e) => this.handleError('RealTimeService.setReservations', e));
+
+    if (sendToPos) {
+      return res.send(ApiResponse.success(params));
+    }
 
     res.send(ApiResponse.success(undefined));
   };
@@ -51,18 +56,24 @@ export class ReservationsController {
 
     const syncs = await ReservationsDB.getAndMergeSyncsFromOrders(orders.filter((o) => !o.isNew));
 
-    ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs).catch(() => {});
+    ReservationsDB.saveMultiReservationsFromSyncs(branchId, syncs).catch((e) => this.handleError('ReservationsDB.saveMultiReservationsFromSyncs', e));
 
     const fullSyncs = SyncService.syncFromNewOrders(orders.filter((o) => o.isNew)).concat(syncs);
 
     if (!finishedOrders) {
-      RealTimeService.setReservations(branchId, fullSyncs, init).catch(() => {});
+      RealTimeService.setReservations(branchId, fullSyncs, init).catch((e) => this.handleError('RealTimeService.setReservations', e));
     }
 
     OntopoService.getInstance()
       .setReservations(externalBranchId, fullSyncs)
-      .catch(() => {});
+      .catch((e) => this.handleError('OntopoService.setReservations', e));
 
     res.send(ApiResponse.success(undefined));
+  };
+
+  private static handleError = (functionName: string, error: any) => {
+    const message = error instanceof Error ? error.message : JSON.stringify(error);
+
+    console.log(`ERROR! function: ${functionName}, message: ${message}`);
   };
 }
