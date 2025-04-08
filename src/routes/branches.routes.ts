@@ -8,6 +8,6 @@ router.post('/', AuthController.verify('super_admin', false), BranchesController
 
 router.get('/:id', AuthController.verify('user', false), BranchesController.getBranchById);
 
-router.put('/', AuthController.verify('super_admin', false), BranchesController.updateBranch);
+router.put('/', AuthController.verify('user', false), BranchesController.updateBranch);
 
 export const branchesRouter = router;
