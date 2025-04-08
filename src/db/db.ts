@@ -105,12 +105,23 @@ export class DB {
     };
   };
 
-  public update = async <T>(tableName: string, primaryKey: keyof T, primaryKeyValue: string, expressions: Expressions<T>[]) => {
+  public update = async <T>(tableName: string, primaryKey: keyof T, primaryValue: string, value: Partial<T>, ignore: (keyof T)[]) => {
+    const set = new Set<keyof T>(ignore);
+    const expressions: Expressions<T>[] = [];
+
+    Object.keys(value).forEach((k) => {
+      const key = k as keyof T;
+
+      if (key !== primaryKey && !set.has(key as keyof T)) {
+        expressions.push({ alias: `:${k}`, expression: key, value: value[key] });
+      }
+    });
+
     const { names, values, expressionString } = this.getNameAndValuesExpressions(expressions, ', ');
 
     await this.client.send(
       new UpdateCommand({
-        Key: { [primaryKey]: primaryKeyValue },
+        Key: { [primaryKey]: primaryValue },
         TableName: tableName,
         UpdateExpression: `set ${expressionString}`,
         ExpressionAttributeNames: names,

@@ -37,6 +37,6 @@ export class ServicesDB {
   };
 
   public static updateService = async (id: string, service: Partial<Service>) => {
-    await DB.getInstance().update<Service>(this.TABLE_NAME, 'id', id, [{ alias: ':a', expression: 'access', value: service.access }]);
+    await DB.getInstance().update<Service>(this.TABLE_NAME, 'id', id, service, ['accessKeyId', 'accessSecretKey', 'id']);
   };
 }

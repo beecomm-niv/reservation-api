@@ -4,4 +4,11 @@ export interface Branch {
 
   posBranchId: string;
   reservationsBranchId: string;
+
+  areas: Area[];
+}
+
+interface Area {
+  id: string;
+  name: string;
 }

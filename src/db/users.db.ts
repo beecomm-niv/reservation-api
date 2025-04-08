@@ -61,9 +61,6 @@ export class UsersDB {
   };
 
   public static updateUser = async (userId: string, user: Partial<User>) => {
-    await DB.getInstance().update<User>(this.TABLE_NAME, 'userId', userId, [
-      { alias: ':n', expression: 'name', value: user.name },
-      { alias: ':b', expression: 'branchId', value: user.branchId },
-    ]);
+    await DB.getInstance().update<User>(this.TABLE_NAME, 'userId', userId, user, ['email', 'password', 'userId']);
   };
 }
