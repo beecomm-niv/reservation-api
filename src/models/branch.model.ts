@@ -6,9 +6,29 @@ export interface Branch {
   reservationsBranchId: string;
 
   areas: Area[];
+  maps: Map[];
+  tables: Table[];
 }
 
 interface Area {
   id: string;
   name: string;
+}
+
+interface Map {
+  id: string;
+  name: string;
+  imagePath?: string;
+}
+
+interface Table {
+  id: string;
+  tableNum: number;
+  x: number;
+  y: number;
+  size: number;
+  type: 'rectangle' | 'circle' | 'bar';
+
+  area: string;
+  map: string;
 }

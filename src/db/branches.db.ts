@@ -13,6 +13,8 @@ export class BranchesDB {
       posBranchId,
       reservationsBranchId,
       areas: [],
+      maps: [],
+      tables: [],
     };
 
     await DB.getInstance().setItemByKey(this.TABLE_NAME, branch, {
