@@ -27,7 +27,7 @@ interface Table {
   x: number;
   y: number;
   size: number;
-  type: 'rectangle' | 'circle' | 'bar';
+  type: 'square' | 'circle' | 'bar' | 'rectangleVertical' | 'rectangleHorizontal';
 
   area: string;
   map: string;
