@@ -16,7 +16,6 @@ export class ReservationsService {
       comment: order.comment,
       discount: order.discount,
       fromDate: order.fromDate,
-      openFromPos: order.openFromPos,
       orderId: order.orderId,
       orderStatus: order.orderStatus,
       service: order.service,

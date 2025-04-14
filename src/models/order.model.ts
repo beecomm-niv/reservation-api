@@ -24,7 +24,6 @@ export interface OrderInfo {
   service: number;
   orderStatus: OrderStatus;
   totalOrder: number;
-  openFromPos: boolean;
 }
 
 export interface Dish {
