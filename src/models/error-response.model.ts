@@ -17,4 +17,6 @@ export class ErrorResponse extends Error {
   public static EmailAlradyExist = () => new ErrorResponse(1006, 'Email already exists');
   public static InvalidExpression = () => new ErrorResponse(1007, 'Invalid expression');
   public static FaildToHandleNewSync = (message: string) => new ErrorResponse(1008, 'Faild to handle new sync. message: ' + message);
+  public static InvalidTablesRequest = () => new ErrorResponse(1009, 'Invalid tables request');
+  public static InvalidExpectedDate = () => new ErrorResponse(1010, 'Invalid expected date');
 }

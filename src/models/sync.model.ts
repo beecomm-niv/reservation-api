@@ -1,38 +1,36 @@
-import { OrderDto } from './order.model';
+import { Order } from './order.model';
 
-export interface ISync {
+export interface Sync {
   syncId: string;
   syncAt: string;
-  reservation: Reservation | null;
+  reservation: Booking;
+  order: Order | null;
 }
 
-export type Sync = ISync & {
-  order: OrderDto | null;
-};
-
-export interface Reservation {
+export interface Booking {
   reservationId: string;
-  createdBy: string | null;
-  createdAt: string | null;
-  duration: number | null;
-  expectedDate: string | null;
-  expectedTime: string | null;
-  patron: Patron | null;
-  size: number | null;
-  status: ReservationStatus | null;
+  createdBy: string;
+  createdAt: string;
+  duration: number;
+  expectedDate: string;
+  expectedTime: string;
+  patron: Patron;
+  size: number;
+  status: ReservationStatus;
   table: string[];
-  comment: string | null;
-  creditcardStatus: CreditCardStatus | null;
-  stage: ReservationStage | null;
-  hasPackage: boolean | null;
-  lastModified: number | null;
+  comment: string;
+  creditcardStatus: CreditCardStatus;
+  stage: ReservationStage;
+  hasPackage: boolean;
+  lastModified: number;
+  additionalInfo?: any;
 }
 
 interface Patron {
-  phone: string | null;
-  name: string | null;
-  status: PatronStatus | null;
-  note: string | null;
+  phone: string;
+  name: string;
+  status: PatronStatus;
+  note: string;
 }
 
 export type ReservationStatus = 'done' | 'deleted' | 'noShow' | 'canceled' | 'seated' | 'approved' | 'standby' | 'invited' | 'callback' | 'empty' | 'queue';

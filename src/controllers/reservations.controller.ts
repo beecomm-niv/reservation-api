@@ -1,28 +1,29 @@
+import { ReservationsDB } from '../db/reservations.db';
+import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
-import { OrderDto } from '../models/order.model';
+import { ErrorResponse } from '../models/error-response.model';
 import { Sync } from '../models/sync.model';
+import { AdapterService } from '../services/adapter.service';
 
 interface SetReservationBody {
   branchId: string;
   params: Sync;
 }
 
-interface WatchPosBody {
-  branchId: string;
-  externalBranchId: string;
-
-  orders: OrderDto[];
-  init: boolean;
-  finishedOrders: boolean;
-}
-
 export class ReservationsController {
-  public static setReservation: ControllerHandler<Sync | undefined> = async (req, res) => {
+  public static setReservation: ControllerHandler<boolean> = async (req, res) => {
     const { branchId, params }: Partial<SetReservationBody> = req.body;
-  };
 
-  public static posWatch: ControllerHandler<undefined> = async (req, res) => {
-    const { branchId, externalBranchId, orders, init, finishedOrders }: WatchPosBody = req.body;
+    if (!branchId || !params) {
+      throw ErrorResponse.InvalidParams();
+    }
+
+    delete params.reservation?.additionalInfo;
+
+    await ReservationsDB.saveReservation(branchId, params);
+    await AdapterService.getInstance().sendReservation(branchId, params);
+
+    res.json(ApiResponse.success(true));
   };
 
   private static handleError = (functionName: string, error: any) => {

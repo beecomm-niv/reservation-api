@@ -1,4 +1,13 @@
 import axios, { AxiosInstance } from 'axios';
+import { ReservationDto } from '../models/reservation';
+import { ErrorResponse } from '../models/error-response.model';
+import { Sync } from '../models/sync.model';
+import { ReservationsService } from './reservations.service';
+
+interface SendReservationBody {
+  branchId: string;
+  reservation: ReservationDto;
+}
 
 interface Response<T> {
   result?: boolean;
@@ -10,7 +19,7 @@ interface Response<T> {
 export class AdapterService {
   private static instance: AdapterService;
 
-  public client: AxiosInstance;
+  private client: AxiosInstance;
 
   private constructor() {
     this.client = axios.create({
@@ -28,5 +37,24 @@ export class AdapterService {
     }
 
     return this.instance;
+  };
+
+  public sendReservation = async (branchId: string, sync: Sync) => {
+    if (!sync.reservation?.table.length) {
+      throw ErrorResponse.InvalidParams();
+    }
+
+    const body: SendReservationBody = {
+      branchId,
+      reservation: ReservationsService.convertSyncToReservationDto(sync),
+    };
+
+    const { data } = await this.client.post<Response<boolean>>('/mobile/sync', body);
+
+    if (data.error || (data.result !== undefined && !data.result)) {
+      throw ErrorResponse.FaildToHandleNewSync(data.message || 'internal error');
+    }
+
+    return data.data;
   };
 }

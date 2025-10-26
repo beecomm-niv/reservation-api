@@ -1,20 +1,8 @@
 import { ReservationStage } from './sync.model';
 
-export interface OrderDto extends OrderInfo {
+export interface Order {
   id: string;
   syncId: string;
-  tables: string[];
-  dinnersCount: number;
-  duration: number;
-  expected: string;
-
-  isNew: boolean;
-  stage: ReservationStage;
-
-  dishes?: Dish[];
-}
-
-export interface OrderInfo {
   orderId: number;
   waitress: string;
   comment: string;
@@ -24,6 +12,13 @@ export interface OrderInfo {
   service: number;
   orderStatus: OrderStatus;
   totalOrder: number;
+  tables: string[];
+  dinnersCount: number;
+  duration: number;
+  expected: string;
+  stage: ReservationStage;
+
+  dishes: Dish[] | null;
 }
 
 export interface Dish {
