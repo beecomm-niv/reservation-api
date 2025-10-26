@@ -3,14 +3,14 @@ import { OrderDto } from './order.model';
 export interface ISync {
   syncId: string;
   syncAt: string;
-  reservation: Booking | null;
+  reservation: Reservation | null;
 }
 
 export type Sync = ISync & {
   order: OrderDto | null;
 };
 
-export interface Booking {
+export interface Reservation {
   reservationId: string;
   createdBy: string | null;
   createdAt: string | null;

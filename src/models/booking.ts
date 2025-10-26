@@ -1,7 +1,7 @@
 import { Dish, OrderInfo } from './order.model';
 import { ISync, PatronStatus } from './sync.model';
 
-export type Reservation = ISync & {
+export type Booking = ISync & {
   branchId: string;
   clientPhone: string;
   ts: number;
@@ -10,7 +10,7 @@ export type Reservation = ISync & {
   dishes: Dish[] | null;
 };
 
-export interface ReservationDto {
+export interface BookingDto {
   syncId: string;
 
   duration: number;

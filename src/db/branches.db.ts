@@ -4,7 +4,7 @@ import { DB } from './db';
 import { v4 } from 'uuid';
 
 export class BranchesDB {
-  private static readonly TABLE_NAME = 'branches';
+  private static readonly TABLE_NAME = 'guest_branches';
 
   public static createBranch = async (name: string, posBranchId: string, reservationsBranchId: string) => {
     const branch: Branch = {

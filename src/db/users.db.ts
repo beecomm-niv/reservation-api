@@ -6,7 +6,7 @@ import crypto from 'crypto';
 import bycrypt from 'bcryptjs';
 
 export class UsersDB {
-  private static readonly TABLE_NAME = 'users';
+  private static readonly TABLE_NAME = 'guest_users';
 
   public static getUserById = async (userId: string): Promise<User> => {
     const user = await DB.getInstance().findItemByKey<User>(UsersDB.TABLE_NAME, { userId });
@@ -44,7 +44,7 @@ export class UsersDB {
   public static getUserByEmailAndPassword = async (requestedEmail: string, requestedPassword: string): Promise<User> => {
     const email = requestedEmail.toLowerCase();
 
-    const response = await DB.getInstance().query<User>(this.TABLE_NAME, 'email-index', [{ alias: ':e', expression: 'email', value: email }]);
+    const response = await DB.getInstance().query<User>(this.TABLE_NAME, 'findUserByEmail', [{ alias: ':e', expression: 'email', value: email }]);
 
     if (!response.Items?.length) {
       throw ErrorResponse.BadEmailOrPassword();

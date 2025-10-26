@@ -5,7 +5,7 @@ import { DB } from './db';
 import crypto from 'crypto';
 
 export class ServicesDB {
-  private static TABLE_NAME = 'services';
+  private static TABLE_NAME = 'guest_services';
 
   public static createService = async (name: string, access: ACCESS[]) =>
     DB.getInstance().setItemByKey<Service>(
@@ -24,7 +24,7 @@ export class ServicesDB {
     );
 
   public static findServiceByKeyAndSecret = async (accessKey: string, accessSecret: string): Promise<Service> => {
-    const response = await DB.getInstance().query<Service>(this.TABLE_NAME, 'accessKeyId-accessSecretKey-index', [
+    const response = await DB.getInstance().query<Service>(this.TABLE_NAME, 'findServiceByAccessAndSecret', [
       { alias: ':k', expression: 'accessKeyId', value: accessKey },
       { alias: ':s', expression: 'accessSecretKey', value: accessSecret },
     ]);
