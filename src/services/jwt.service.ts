@@ -10,7 +10,7 @@ export class JwtService {
       throw ErrorResponse.AuthorizationError();
     }
 
-    return jwt.sign(payload, this.SECRET);
+    return jwt.sign(payload, this.SECRET, { expiresIn: '1d' });
   };
 
   public static verify = (token?: string): JwtPayload | null => {

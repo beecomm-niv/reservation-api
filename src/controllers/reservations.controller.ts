@@ -20,7 +20,7 @@ interface PosWatchBody {
 }
 
 export class ReservationsController {
-  public static setReservation: ControllerHandler<boolean> = async (req, res) => {
+  public static setReservation: ControllerHandler<null> = async (req, res) => {
     const { branchId, params }: Partial<SetReservationBody> = req.body;
 
     if (!branchId || !params) {
@@ -32,10 +32,10 @@ export class ReservationsController {
     await ReservationsDB.saveReservation(branchId, params);
     await AdapterService.getInstance().sendReservation(branchId, params);
 
-    res.json(ApiResponse.success(true));
+    res.json(ApiResponse.success(null));
   };
 
-  public static posWatch: ControllerHandler<boolean> = async (req, res) => {
+  public static posWatch: ControllerHandler<null> = async (req, res) => {
     const { externalBranchId, orders }: Partial<PosWatchBody> = req.body;
 
     if (!externalBranchId || !orders?.length) {
@@ -48,8 +48,8 @@ export class ReservationsController {
 
     const syncs: Sync[] = reservations.map(ReservationsService.convertReservationToSync).concat(orders.filter((o) => o.isVisitor).map(ReservationsService.convertOrderToSync));
 
-    OntopoService.getInstance().setReservations(externalBranchId, syncs).catch();
+    OntopoService.getInstance().setReservations(externalBranchId, syncs).catch(console.log);
 
-    res.json(ApiResponse.success(true));
+    res.json(ApiResponse.success(null));
   };
 }

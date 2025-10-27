@@ -1,5 +1,5 @@
 export type USER_ROLE = 'super_admin' | 'admin' | 'user' | 'service';
-export type ACCESS = '*' | 'sync' | 'pos-watch';
+export type ACCESS = '*' | 'sync' | 'watch';
 
 export interface JwtPayload {
   id: string;

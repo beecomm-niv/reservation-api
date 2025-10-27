@@ -6,6 +6,6 @@ const router = Router();
 
 router.post('/', AuthController.verify(['service'], 'sync'), ReservationsController.setReservation);
 
-router.post('/', AuthController.verify(['service'], 'pos-watch'), ReservationsController.posWatch);
+router.post('/watch', AuthController.verify(['service'], 'watch'), ReservationsController.posWatch);
 
 export const reservationsRouter = router;
