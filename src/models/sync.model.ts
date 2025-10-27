@@ -3,7 +3,7 @@ import { Order } from './order.model';
 export interface Sync {
   syncId: string;
   syncAt: string;
-  reservation: Booking;
+  reservation: Booking | null;
   order: Order | null;
 }
 
@@ -23,7 +23,6 @@ export interface Booking {
   stage: ReservationStage;
   hasPackage: boolean;
   lastModified: number;
-  additionalInfo?: any;
 }
 
 interface Patron {

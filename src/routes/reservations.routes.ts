@@ -4,6 +4,8 @@ import { ReservationsController } from '../controllers/reservations.controller';
 
 const router = Router();
 
-router.post('/', AuthController.verify('user', true, 'sync'), ReservationsController.setReservation);
+router.post('/', AuthController.verify(['service'], 'sync'), ReservationsController.setReservation);
+
+router.post('/', AuthController.verify(['service'], 'pos-watch'), ReservationsController.posWatch);
 
 export const reservationsRouter = router;

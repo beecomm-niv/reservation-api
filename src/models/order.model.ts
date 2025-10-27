@@ -1,24 +1,22 @@
-import { ReservationStage } from './sync.model';
-
 export interface Order {
   id: string;
   syncId: string;
   orderId: number;
+
+  tables: string[];
+  dinnersCount: number;
+  duration: number;
   waitress: string;
   comment: string;
   fromDate: string;
   toDate: string;
   discount: number;
   service: number;
-  orderStatus: OrderStatus;
+  orderStatus: number;
   totalOrder: number;
-  tables: string[];
-  dinnersCount: number;
-  duration: number;
-  expected: string;
-  stage: ReservationStage;
+  isVisitor: boolean;
 
-  dishes: Dish[] | null;
+  dishes: Dish[];
 }
 
 export interface Dish {
@@ -31,11 +29,4 @@ export interface Dish {
   cancel: boolean;
 
   toppings: Dish[];
-}
-
-export enum OrderStatus {
-  OPEN,
-  CANCEL,
-  CLOSED,
-  BILL = 4,
 }

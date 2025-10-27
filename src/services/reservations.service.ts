@@ -1,20 +1,21 @@
 import dayjs from 'dayjs';
 import { Reservation, ReservationDto } from '../models/reservation';
-import { Sync } from '../models/sync.model';
+import { ReservationStage, Sync } from '../models/sync.model';
 import { OrderService } from './order.service';
 import { ErrorResponse } from '../models/error-response.model';
+import { Order } from '../models/order.model';
 
 export class ReservationsService {
   public static convertSyncToReservation = (branchId: string, sync: Sync): Reservation => ({
     branchId: branchId,
-    clientName: sync.reservation.patron.name,
-    clientPhone: sync.reservation.patron.phone,
+    clientName: sync.reservation?.patron.name || '',
+    clientPhone: sync.reservation?.patron.phone || '',
     order: sync.order,
     reservation: sync.reservation,
     syncAt: sync.syncAt,
     syncId: sync.syncId,
     totalOrder: OrderService.getOrderTotalFromDishes(sync.order),
-    dinners: sync.reservation.size,
+    dinners: sync.reservation?.size || 1,
     ts: dayjs(sync.syncAt).valueOf(),
   });
 
@@ -44,6 +45,20 @@ export class ReservationsService {
     };
   };
 
+  public static convertReservationToSync = (reservation: Reservation): Sync => ({
+    order: reservation.order,
+    reservation: reservation.reservation,
+    syncAt: reservation.syncAt,
+    syncId: reservation.syncId,
+  });
+
+  public static convertOrderToSync = (order: Order): Sync => ({
+    order: order,
+    reservation: null!,
+    syncAt: dayjs().utc().toString(),
+    syncId: order.syncId,
+  });
+
   private static convertToDate = (expectedDate: string, expectedTime: string) => {
     const year = expectedDate.slice(0, 4);
     const month = expectedDate.slice(4, 6);
@@ -53,5 +68,33 @@ export class ReservationsService {
     const minutes = expectedTime.slice(2, 4);
 
     return `${day}/${month}/${year} ${hours}:${minutes}`;
+  };
+
+  private static getStageFromOrder = (order: Order): ReservationStage => {
+    switch (order.orderStatus) {
+      case 1:
+      case 2:
+        return 'done';
+      case 4:
+        return 'check';
+      default:
+        if (order.dishes.length > 0) {
+          return 'ordered';
+        }
+
+        return 'preOrder';
+    }
+  };
+
+  public static mergeReservationWithOrder = (reservation: Reservation, order: Order) => {
+    if (!order || !reservation.reservation) return;
+
+    reservation.order = order;
+    reservation.dinners = order.dinnersCount;
+    reservation.totalOrder = order.totalOrder;
+
+    reservation.reservation.table = order.tables;
+    reservation.reservation.size = order.dinnersCount;
+    reservation.reservation.stage = this.getStageFromOrder(order);
   };
 }

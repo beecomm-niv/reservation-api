@@ -6,7 +6,7 @@ export interface Reservation {
   syncId: string;
   syncAt: string;
   order: Order | null;
-  reservation: Booking;
+  reservation: Booking | null;
   clientName: string;
   clientPhone: string;
   totalOrder: number;

@@ -4,7 +4,7 @@ export class OrderService {
   public static getOrderTotalFromDishes = (order: Order | null) => {
     let total = 0;
 
-    if (order?.dishes?.length) {
+    if (order?.dishes.length) {
       order.dishes.forEach((d) => {
         total += d.totalPrice;
 
