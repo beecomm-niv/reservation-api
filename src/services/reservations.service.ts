@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { Reservation, ReservationDto } from '../models/reservation';
-import { ReservationStage, Sync } from '../models/sync.model';
+import { ReservationStage, ReservationStatus, Sync } from '../models/sync.model';
 import { OrderService } from './order.service';
 import { ErrorResponse } from '../models/error-response.model';
 import { Order } from '../models/order.model';
@@ -9,7 +9,7 @@ export class ReservationsService {
   public static convertSyncToReservation = (branchId: string, sync: Sync): Reservation => ({
     branchId: branchId,
     clientName: sync.reservation?.patron.name || '',
-    clientPhone: sync.reservation?.patron.phone || '',
+    clientPhone: sync.reservation?.patron.phone || '000-000-0000',
     order: sync.order,
     reservation: sync.reservation,
     syncAt: sync.syncAt,
@@ -86,6 +86,17 @@ export class ReservationsService {
     }
   };
 
+  private static getStatusFromOrder = (order: Order, current: ReservationStatus): ReservationStatus => {
+    switch (order.orderStatus) {
+      case 1:
+        return 'canceled';
+      case 2:
+        return 'done';
+      default:
+        return current;
+    }
+  };
+
   public static mergeReservationWithOrder = (reservation: Reservation, order: Order) => {
     if (!order || !reservation.reservation) return;
 
@@ -96,5 +107,6 @@ export class ReservationsService {
     reservation.reservation.table = order.tables;
     reservation.reservation.size = order.dinnersCount;
     reservation.reservation.stage = this.getStageFromOrder(order);
+    reservation.reservation.status = this.getStatusFromOrder(order, reservation.reservation.status);
   };
 }

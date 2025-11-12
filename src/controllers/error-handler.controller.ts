@@ -16,8 +16,9 @@ export class ErrorController {
       code = err.code;
     }
 
-    if (req.requestId) {
-      LogsDb.updateError(req.requestId, message).catch();
+    if (req.log) {
+      req.log.message = message;
+      LogsDb.setLog(req.log);
     }
 
     res.status(Math.min(code, 500)).send(ApiResponse.error(code, message));

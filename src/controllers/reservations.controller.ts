@@ -1,4 +1,4 @@
-import { LogsDb } from '../db/logs.db';
+import dayjs from 'dayjs';
 import { ReservationsDB } from '../db/reservations.db';
 import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
@@ -27,7 +27,7 @@ export class ReservationsController {
       throw ErrorResponse.InvalidParams();
     }
 
-    req.requestId = await LogsDb.saveLog(branchId, 'INFO', req.user?.id || '', params, '');
+    req.log = { id: params.syncId, user: req.user?.id || 'unknown', payload: { branchId: branchId }, message: '', ts: dayjs().valueOf() };
 
     await ReservationsDB.saveReservation(branchId, params);
     await AdapterService.getInstance().sendReservation(branchId, params);

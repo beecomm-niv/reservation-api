@@ -1,5 +1,3 @@
-import './database-init';
-
 import { Express } from 'express';
 import { ErrorController } from './controllers/error-handler.controller';
 import { appRouter } from './routes';
