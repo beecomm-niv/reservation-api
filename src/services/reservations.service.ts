@@ -9,7 +9,7 @@ export class ReservationsService {
   public static convertSyncToReservation = (branchId: string, sync: Sync): Reservation => ({
     branchId: branchId,
     clientName: sync.reservation?.patron.name || '',
-    clientPhone: sync.reservation?.patron.phone || '000-000-0000',
+    clientPhone: sync.reservation?.patron.phone || '+972000000000',
     order: sync.order,
     reservation: sync.reservation,
     syncAt: sync.syncAt,
