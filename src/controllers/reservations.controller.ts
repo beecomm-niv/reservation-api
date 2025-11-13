@@ -48,7 +48,9 @@ export class ReservationsController {
 
     const syncs: Sync[] = reservations.map(ReservationsService.convertReservationToSync).concat(orders.filter((o) => o.isVisitor).map(ReservationsService.convertOrderToSync));
 
-    OntopoService.getInstance().setReservations(externalBranchId, syncs).catch(console.log);
+    OntopoService.getInstance()
+      .setReservations(externalBranchId, syncs)
+      .catch(() => {});
 
     res.json(ApiResponse.success(null));
   };
