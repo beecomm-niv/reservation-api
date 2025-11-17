@@ -9,6 +9,7 @@ export class OntopoService {
   constructor() {
     this.api = axios.create({
       baseURL: 'https://top-openapi.staging-01.ontopo.cz',
+      timeout: 10_000,
       validateStatus: () => true,
     });
   }
@@ -23,7 +24,6 @@ export class OntopoService {
 
   private sendSync = async (branchId: string, sync: Sync) => {
     await this.api.post('/pos/setReservation', sync, {
-      timeout: 10_000,
       headers: {
         'x-api-key': branchId,
       },
@@ -34,5 +34,19 @@ export class OntopoService {
     const promises: Promise<void>[] = syncs.map((s) => this.sendSync(branchId, s));
 
     await Promise.all(promises);
+  };
+
+  public getTodayReservations = async (branchId: string): Promise<Sync[]> => {
+    const response = await this.api.post('/pos/reservationsForToday', undefined, {
+      headers: {
+        'x-api-key': branchId,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(response.data.message || 'Failed with status ' + response.status);
+    }
+
+    return response.data as Sync[];
   };
 }

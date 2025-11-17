@@ -4,10 +4,10 @@ import { AuthController } from '../controllers/auth.controller';
 
 const router = Router();
 
-router.post('/create', AuthController.verify(['super_admin'], '*'), ServiceController.createService);
+router.post('/create', AuthController.verify([], '*'), ServiceController.createService);
 
 router.post('/token', ServiceController.getToken);
 
-router.put('/', AuthController.verify(['super_admin'], '*'), ServiceController.updateService);
+router.put('/', AuthController.verify([], '*'), ServiceController.updateService);
 
 export const servicesRouter = router;

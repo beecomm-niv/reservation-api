@@ -4,7 +4,7 @@ import { BranchesController } from '../controllers/branches.controller';
 
 const router = Router();
 
-router.post('/', AuthController.verify(['super_admin'], '*'), BranchesController.createBranch);
+router.post('/', AuthController.verify([], '*'), BranchesController.createBranch);
 
 router.get('/:id', AuthController.verify(['user'], '*'), BranchesController.getBranchById);
 

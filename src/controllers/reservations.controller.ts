@@ -8,6 +8,7 @@ import { Sync } from '../models/sync.model';
 import { AdapterService } from '../services/adapter.service';
 import { OntopoService } from '../services/ontopo.service';
 import { ReservationsService } from '../services/reservations.service';
+import { ReservationDto } from '../models/reservation';
 
 interface SetReservationBody {
   branchId: string;
@@ -53,5 +54,18 @@ export class ReservationsController {
       .catch(() => {});
 
     res.json(ApiResponse.success(null));
+  };
+
+  public static getTodayReservations: ControllerHandler<ReservationDto[]> = async (req, res) => {
+    const { externalBranchId } = req.body;
+
+    if (!externalBranchId) {
+      throw ErrorResponse.InvalidParams();
+    }
+
+    const syncs = await OntopoService.getInstance().getTodayReservations(externalBranchId);
+    const reservations = syncs.map(ReservationsService.convertSyncToReservationDto);
+
+    return res.json(ApiResponse.success(reservations));
   };
 }

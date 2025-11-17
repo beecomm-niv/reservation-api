@@ -8,4 +8,6 @@ router.post('/', AuthController.verify(['service'], 'sync'), ReservationsControl
 
 router.post('/watch', AuthController.verify(['service'], 'watch'), ReservationsController.posWatch);
 
+router.post('/today', AuthController.verify(['service'], 'watch'), ReservationsController.getTodayReservations);
+
 export const reservationsRouter = router;
