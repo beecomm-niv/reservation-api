@@ -14,6 +14,7 @@ interface Response<T> {
   error?: boolean;
   message?: string;
   data: T;
+  errors?: { code: number; message: string }[];
 }
 
 export class AdapterService {
@@ -52,7 +53,8 @@ export class AdapterService {
     const { data } = await this.client.post<Response<boolean>>('/mobile/sync', body);
 
     if (data.error || (data.result !== undefined && !data.result)) {
-      throw ErrorResponse.FaildToHandleNewSync(data.message || 'internal error');
+      const messsage = data.errors?.at(0)?.message || data.message || 'internal error';
+      throw ErrorResponse.FaildToHandleNewSync(messsage);
     }
 
     return data.data;
