@@ -1,3 +1,5 @@
+import { ReservationStage, ReservationStatus } from './sync.model';
+
 export interface Order {
   id: string;
   syncId: string;
@@ -13,6 +15,8 @@ export interface Order {
   discount: number;
   service: number;
   orderStatus: number;
+  status: ReservationStatus;
+  stage: ReservationStage;
   totalOrder: number;
   isVisitor: boolean;
 

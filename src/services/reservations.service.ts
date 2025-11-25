@@ -70,35 +70,8 @@ export class ReservationsService {
     return `${day}/${month}/${year} ${hours}:${minutes}`;
   };
 
-  private static getStageFromOrder = (order: Order): ReservationStage => {
-    switch (order.orderStatus) {
-      case 1:
-      case 2:
-        return 'done';
-      case 4:
-        return 'check';
-      default:
-        if (order.dishes.length > 0) {
-          return 'ordered';
-        }
-
-        return 'preOrder';
-    }
-  };
-
-  private static getStatusFromOrder = (order: Order, current: ReservationStatus): ReservationStatus => {
-    switch (order.orderStatus) {
-      case 1:
-        return 'canceled';
-      case 2:
-        return 'done';
-      default:
-        return current;
-    }
-  };
-
   public static mergeReservationWithOrder = (reservation: Reservation, order: Order) => {
-    if (!order || !reservation.reservation) return;
+    if (!reservation.reservation) return;
 
     reservation.order = order;
     reservation.dinners = order.dinnersCount;
@@ -106,7 +79,8 @@ export class ReservationsService {
 
     reservation.reservation.table = order.tables;
     reservation.reservation.size = order.dinnersCount;
-    reservation.reservation.stage = this.getStageFromOrder(order);
-    reservation.reservation.status = this.getStatusFromOrder(order, reservation.reservation.status);
+
+    reservation.reservation.stage = order.stage;
+    reservation.reservation.status = order.status;
   };
 }
