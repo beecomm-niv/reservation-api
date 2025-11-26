@@ -82,5 +82,7 @@ export class ReservationsService {
 
     reservation.reservation.stage = order.stage;
     reservation.reservation.status = order.status;
+
+    order.reservationId = reservation.reservation.reservationId;
   };
 }

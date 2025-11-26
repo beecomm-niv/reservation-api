@@ -13,7 +13,7 @@ export interface Order {
   serviceAmount: number;
   payments: any[];
   comment: string;
-  reservationId: string;
+  reservationId?: string;
   tables: string[];
   isVisitor: boolean;
   isStaffTable: boolean;
