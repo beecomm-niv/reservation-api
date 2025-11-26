@@ -39,7 +39,7 @@ export class DB {
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
     const config: Config = {
-      region: 'il-central-1',
+      region: process.env.AWS_REGION || 'il-central-1',
     };
 
     if (accessKeyId && secretAccessKey) {
