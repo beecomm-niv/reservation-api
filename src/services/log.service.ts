@@ -1,6 +1,8 @@
 import { CloudWatchLogsClient, CloudWatchLogsClientConfig, PutLogEventsCommand, PutLogEventsCommandInput } from '@aws-sdk/client-cloudwatch-logs';
 import dayjs from 'dayjs';
 
+type LogSeverity = 'INFO' | 'ERROR';
+
 export class LogService {
   private static instance: LogService;
 
@@ -32,13 +34,19 @@ export class LogService {
     return config;
   }
 
-  public saveLog = (message: string) => {
+  public saveLog = (severity: LogSeverity, message: string, data: object) => {
+    const payload = {
+      ...data,
+      message,
+      severity,
+    };
+
     const params: PutLogEventsCommandInput = {
       logGroupName: 'reservation-api-logs',
       logStreamName: 'reservation-api-stream',
       logEvents: [
         {
-          message,
+          message: JSON.stringify(payload),
           timestamp: dayjs().valueOf(),
         },
       ],

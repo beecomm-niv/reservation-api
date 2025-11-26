@@ -9,6 +9,7 @@ import { AdapterService } from '../services/adapter.service';
 import { OntopoService } from '../services/ontopo.service';
 import { ReservationsService } from '../services/reservations.service';
 import { ReservationDto } from '../models/reservation';
+import { LogService } from '../services/log.service';
 
 interface SetReservationBody {
   branchId: string;
@@ -28,7 +29,12 @@ export class ReservationsController {
       throw ErrorResponse.InvalidParams();
     }
 
-    await ReservationsDB.saveReservation(branchId, params);
+    const logPayload: ReservationDto & { branchId: string } = { ...ReservationsService.convertSyncToReservationDto(params), branchId };
+    req.logPayload = logPayload;
+
+    LogService.getInstance().saveLog('INFO', 'Set Reservation', logPayload);
+
+    ReservationsDB.saveReservation(branchId, params).catch(() => {});
     await AdapterService.getInstance().sendReservation(branchId, params);
 
     res.json(ApiResponse.success(null));
