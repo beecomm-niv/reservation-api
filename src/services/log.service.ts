@@ -52,6 +52,6 @@ export class LogService {
       ],
     };
 
-    this.logs.send(new PutLogEventsCommand(params)).catch(() => {});
+    this.logs.send(new PutLogEventsCommand(params)).catch(console.log);
   };
 }
