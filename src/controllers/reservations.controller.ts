@@ -34,7 +34,7 @@ export class ReservationsController {
 
     LogService.getInstance().saveLog('INFO', 'Set Reservation', logPayload);
 
-    ReservationsDB.saveReservation(branchId, params).catch(() => {});
+    await ReservationsDB.saveReservation(branchId, params).catch(() => {});
     await AdapterService.getInstance().sendReservation(branchId, params);
 
     res.json(ApiResponse.success(null));
