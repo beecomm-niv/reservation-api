@@ -75,7 +75,7 @@ export class ReservationsService {
 
     reservation.order = order;
     reservation.dinners = order.dinnersCount;
-    reservation.totalOrder = order.totalOrder;
+    reservation.totalOrder = OrderService.getOrderTotalFromDishes(order);
 
     reservation.reservation.table = order.tables;
     reservation.reservation.size = order.dinnersCount;

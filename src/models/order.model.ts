@@ -1,36 +1,34 @@
 import { ReservationStage, ReservationStatus } from './sync.model';
 
 export interface Order {
-  id: string;
   syncId: string;
-  orderId: number;
-
-  tables: string[];
+  posOrderId: string;
+  orderNumber: number;
+  openedAt: string;
+  netTotal: number;
+  items: Item[];
+  discountAmount: number;
   dinnersCount: number;
-  duration: number;
-  waitress: string;
+  currentCourse: number;
+  serviceAmount: number;
+  payments: any[];
   comment: string;
-  fromDate: string;
-  toDate: string;
-  discount: number;
-  service: number;
-  orderStatus: number;
-  status: ReservationStatus;
-  stage: ReservationStage;
-  totalOrder: number;
+  reservationId: string;
+  tables: string[];
   isVisitor: boolean;
+  isStaffTable: boolean;
 
-  dishes: Dish[];
+  orderStatus: number;
+  duration: number;
+  stage: ReservationStage;
+  status: ReservationStatus;
 }
 
-export interface Dish {
-  name: string;
-  dishId: number;
-  netId: string;
-  unitPrice: number;
+export interface Item {
+  itemId: string;
+  itemName: string;
   quantity: number;
-  totalPrice: number;
-  cancel: boolean;
-
-  toppings: Dish[];
+  status: number;
+  discount: number;
+  price: number;
 }
