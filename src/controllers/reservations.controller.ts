@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { ReservationsDB } from '../db/reservations.db';
 import { ApiResponse } from '../models/api-response.model';
 import { ControllerHandler } from '../models/controller-handler.model';
@@ -10,6 +9,9 @@ import { OntopoService } from '../services/ontopo.service';
 import { ReservationsService } from '../services/reservations.service';
 import { ReservationDto } from '../models/reservation';
 import { LogService } from '../services/log.service';
+import { LogSeverity } from '../models/log.model';
+import { BranchesDB } from '../db/branches.db';
+import { TelegramService } from '../services/telegram.service';
 
 interface SetReservationBody {
   branchId: string;
@@ -25,19 +27,25 @@ export class ReservationsController {
   public static setReservation: ControllerHandler<null> = async (req, res) => {
     const { branchId, params }: Partial<SetReservationBody> = req.body;
 
-    if (!branchId || !params) {
-      throw ErrorResponse.InvalidParams();
+    try {
+      if (!branchId || !params) {
+        throw ErrorResponse.InvalidParams();
+      }
+
+      await ReservationsDB.saveReservation(branchId, params);
+      await AdapterService.getInstance().sendReservation(branchId, params);
+
+      this.saveLog('INFO', 'Reservation set successfully', branchId, params);
+
+      res.json(ApiResponse.success(null));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+
+      this.saveLog('ERROR', message, branchId, params);
+      this.sendTelegramAlert(message, branchId).catch(() => {});
+
+      throw error;
     }
-
-    const logPayload: ReservationDto & { branchId: string } = { ...ReservationsService.convertSyncToReservationDto(params), branchId };
-    req.logPayload = logPayload;
-
-    LogService.getInstance().saveLog('INFO', 'Set Reservation', logPayload);
-
-    await ReservationsDB.saveReservation(branchId, params);
-    await AdapterService.getInstance().sendReservation(branchId, params);
-
-    res.json(ApiResponse.success(null));
   };
 
   public static posWatch: ControllerHandler<null> = async (req, res) => {
@@ -71,5 +79,23 @@ export class ReservationsController {
     const reservations = syncs.map(ReservationsService.convertSyncToReservationDto);
 
     return res.json(ApiResponse.success(reservations));
+  };
+
+  private static saveLog = (severity: LogSeverity, message: string, branchId: string | undefined, sync: Sync | undefined) => {
+    const payload = sync ? ReservationsService.convertSyncToReservationDto(sync) : {};
+
+    LogService.getInstance().saveLog(severity, message, { branchId: branchId || 'empty', ...payload });
+  };
+
+  private static sendTelegramAlert = async (errorMessage: string, branchId: string | undefined) => {
+    let branchName = 'unknown';
+    if (branchId) {
+      const branch = await BranchesDB.findByPosBranchId(branchId);
+      if (branch) {
+        branchName = branch.name;
+      }
+    }
+
+    await TelegramService.getInstance().sendTelegramMessage(`branch: <b>${branchName}</b>\nerror: <b>${errorMessage}</b>`, '-5036944241', true);
   };
 }

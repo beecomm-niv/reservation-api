@@ -12,9 +12,6 @@ export class BranchesDB {
       name,
       posBranchId,
       reservationsBranchId,
-      areas: [],
-      maps: [],
-      tables: [],
     };
 
     await DB.getInstance().setItemByKey(this.TABLE_NAME, branch, {
@@ -29,5 +26,10 @@ export class BranchesDB {
 
   public static updateBranch = async (branchId: string, branch: Partial<Branch>) => {
     await DB.getInstance().update<Branch>(this.TABLE_NAME, 'branchId', branchId, branch, ['branchId']);
+  };
+
+  public static findByPosBranchId = async (posBranchId: string) => {
+    const response = await DB.getInstance().query(this.TABLE_NAME, 'findByPosBranchId', [{ alias: ':p', expression: 'posBranchId', value: posBranchId }]);
+    return response.Items?.length ? (response.Items[0] as Branch) : null;
   };
 }

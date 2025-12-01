@@ -1,7 +1,6 @@
 import { CloudWatchLogsClient, CloudWatchLogsClientConfig, PutLogEventsCommand, PutLogEventsCommandInput } from '@aws-sdk/client-cloudwatch-logs';
 import dayjs from 'dayjs';
-
-type LogSeverity = 'INFO' | 'ERROR';
+import { LogSeverity } from '../models/log.model';
 
 export class LogService {
   private static instance: LogService;
