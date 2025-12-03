@@ -1,15 +1,23 @@
 import dayjs from 'dayjs';
 import { Reservation, ReservationDto } from '../models/reservation';
-import { ReservationStage, ReservationStatus, Sync } from '../models/sync.model';
+import { Patron, Sync } from '../models/sync.model';
 import { OrderService } from './order.service';
 import { ErrorResponse } from '../models/error-response.model';
 import { Order } from '../models/order.model';
+import { GlobasService } from './globals.service';
+
+const seatingRequestsMap: Record<string, string> = {
+  birthday: 'BD',
+  anniversary: 'AN',
+  batchelor: 'BA',
+  company: 'CO',
+};
 
 export class ReservationsService {
   public static convertSyncToReservation = (branchId: string, sync: Sync): Reservation => ({
     branchId: branchId,
     clientName: sync.reservation?.patron.name || '',
-    clientPhone: sync.reservation?.patron.phone || '+972000000000',
+    clientPhone: sync.reservation?.patron.phone || GlobasService.DEFAULT_PHONE,
     order: sync.order,
     reservation: sync.reservation,
     syncAt: sync.syncAt,
@@ -42,7 +50,29 @@ export class ReservationsService {
       status: reservation.status,
       syncId: sync.syncId,
       tableNum: +reservation.table.sort((a, b) => a.localeCompare(b))[0],
+      additionalInfo: this.convertSeatingRequestsToAdditionalInfo(reservation.seatingRequests, sync.reservation?.patron),
     };
+  };
+
+  private static convertSeatingRequestsToAdditionalInfo = (seatingRequests: string[] | undefined, patron: Patron | undefined): string => {
+    const result = new Set<string>();
+
+    const today = dayjs().format('YYYYMMDD');
+    if (patron?.birthday === today) {
+      result.add('BD');
+    }
+
+    if (patron?.anniversary === today) {
+      result.add('AN');
+    }
+
+    seatingRequests?.forEach((r) => {
+      if (seatingRequestsMap[r]) {
+        result.add(seatingRequestsMap[r]);
+      }
+    });
+
+    return Array.from(result).join(';');
   };
 
   public static convertReservationToSync = (reservation: Reservation): Sync => ({

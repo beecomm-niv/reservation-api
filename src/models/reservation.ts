@@ -26,4 +26,5 @@ export interface ReservationDto {
   status: string;
   stage: string;
   expectedDate: string;
+  additionalInfo: string;
 }

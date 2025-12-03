@@ -23,13 +23,18 @@ export interface Booking {
   stage: ReservationStage;
   hasPackage: boolean;
   lastModified: number;
+  seatingRequests?: string[];
 }
 
-interface Patron {
+export interface Patron {
   phone: string;
   name: string;
   status: PatronStatus;
   note: string;
+  birthday: string;
+  anniversary: string;
+  gender: string;
+  email: string;
 }
 
 export type ReservationStatus = 'done' | 'deleted' | 'noShow' | 'canceled' | 'seated' | 'approved' | 'standby' | 'invited' | 'callback' | 'empty' | 'queue';
