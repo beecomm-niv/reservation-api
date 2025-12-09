@@ -20,7 +20,7 @@ export class BranchesController {
 
     const result = await BranchesDB.createBranch(name, posBranchId, reservationsBranchId);
 
-    res.send(ApiResponse.success(result));
+    return res.json(ApiResponse.success(result));
   };
 
   public static getBranchById: ControllerHandler<Branch> = async (req, res) => {
@@ -32,7 +32,7 @@ export class BranchesController {
 
     const branch = await BranchesDB.getBranchById(id);
 
-    res.send(ApiResponse.success(branch));
+    return res.json(ApiResponse.success(branch));
   };
 
   public static updateBranch: ControllerHandler<null> = async (req, res) => {
@@ -44,6 +44,6 @@ export class BranchesController {
 
     await BranchesDB.updateBranch(body.branchId, body);
 
-    res.send(ApiResponse.success(null));
+    return res.json(ApiResponse.success(null));
   };
 }

@@ -12,6 +12,8 @@ import { LogService } from '../services/log.service';
 import { LogSeverity } from '../models/log.model';
 import { BranchesDB } from '../db/branches.db';
 import { TelegramService } from '../services/telegram.service';
+import { BranchCustomer } from '../models/branch-customer.model';
+import { BranchCustomerDB } from '../db/branch-customer.db';
 
 interface SetReservationBody {
   branchId: string;
@@ -32,12 +34,13 @@ export class ReservationsController {
         throw ErrorResponse.InvalidParams();
       }
 
+      BranchCustomerDB.setBranchCustomer(branchId, params).catch(() => {});
       await ReservationsDB.saveReservation(branchId, params);
       await AdapterService.getInstance().sendReservation(branchId, params);
 
       this.saveLog('INFO', 'Reservation set successfully', branchId, params);
 
-      res.json(ApiResponse.success(null));
+      return res.json(ApiResponse.success(null));
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
 
@@ -65,7 +68,18 @@ export class ReservationsController {
       .setReservations(externalBranchId, syncs)
       .catch(() => {});
 
-    res.json(ApiResponse.success(null));
+    return res.json(ApiResponse.success(null));
+  };
+
+  public static getCustomerInfo: ControllerHandler<BranchCustomer> = async (req, res) => {
+    const { branchId, phone } = req.body;
+
+    if (!branchId || !phone) {
+      throw ErrorResponse.InvalidParams();
+    }
+
+    const customerInfo = await BranchCustomerDB.getBranchCustomer(branchId, phone);
+    return res.json(ApiResponse.success(customerInfo));
   };
 
   public static getTodayReservations: ControllerHandler<ReservationDto[]> = async (req, res) => {

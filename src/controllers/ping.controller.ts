@@ -4,6 +4,6 @@ import { ApiResponse } from '../models/api-response.model';
 
 export class PingController {
   public static ping: ControllerHandler<string> = async (_, res) => {
-    res.send(ApiResponse.success(`v${version}`));
+    return res.json(ApiResponse.success(`v${version}`));
   };
 }

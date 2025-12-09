@@ -26,7 +26,7 @@ export class UsersController {
 
     const user = await UsersDB.createUser(email, password, name);
 
-    res.send(ApiResponse.success(UsersService.userToDto(user, null)));
+    return res.json(ApiResponse.success(UsersService.userToDto(user, null)));
   };
 
   public static getUserByEmailAndPassword: ControllerHandler<UserDto> = async (req, res) => {
@@ -41,7 +41,7 @@ export class UsersController {
 
     UsersService.setTokenInHeader(user, res);
 
-    res.send(ApiResponse.success(UsersService.userToDto(user, branch)));
+    return res.json(ApiResponse.success(UsersService.userToDto(user, branch)));
   };
 
   public static getUserFromToken: ControllerHandler<UserDto> = async (req, res) => {
@@ -54,7 +54,7 @@ export class UsersController {
     const user = await UsersDB.getUserById(userId);
     const branch = await UsersService.getBranchByUser(user);
 
-    res.send(ApiResponse.success(UsersService.userToDto(user, branch)));
+    return res.json(ApiResponse.success(UsersService.userToDto(user, branch)));
   };
 
   public static updateUser: ControllerHandler<null> = async (req, res) => {
@@ -66,6 +66,6 @@ export class UsersController {
 
     await UsersDB.updateUser(body.userId, body);
 
-    res.send(ApiResponse.success(null));
+    return res.json(ApiResponse.success(null));
   };
 }

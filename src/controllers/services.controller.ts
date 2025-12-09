@@ -26,7 +26,7 @@ export class ServiceController {
 
     await ServicesDB.createService(name, access);
 
-    res.send(ApiResponse.success(null));
+    return res.json(ApiResponse.success(null));
   };
 
   public static getToken: ControllerHandler<string> = async (req, res) => {
@@ -39,7 +39,7 @@ export class ServiceController {
     const service = await ServicesDB.findServiceByKeyAndSecret(accessKeyId, accessSecretKey);
     const token = JwtService.sign({ access: service.access, id: service.id, role: 'service' });
 
-    res.send(ApiResponse.success(token));
+    return res.json(ApiResponse.success(token));
   };
 
   public static updateService: ControllerHandler<null> = async (req, res) => {
@@ -51,6 +51,6 @@ export class ServiceController {
 
     await ServicesDB.updateService(body.id, body);
 
-    res.send(ApiResponse.success(null));
+    return res.json(ApiResponse.success(null));
   };
 }

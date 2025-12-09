@@ -10,4 +10,6 @@ router.post('/watch', AuthController.verify(['service'], 'watch'), ReservationsC
 
 router.post('/today', AuthController.verify(['service'], 'watch'), ReservationsController.getTodayReservations);
 
+router.post('/customer-info', AuthController.verify(['service'], 'watch'), ReservationsController.getCustomerInfo);
+
 export const reservationsRouter = router;
