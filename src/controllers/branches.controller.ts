@@ -46,4 +46,19 @@ export class BranchesController {
 
     return res.json(ApiResponse.success(null));
   };
+
+  public static syncBranch: ControllerHandler<Partial<Branch>> = async (req, res) => {
+    const { posBranchId } = req.body;
+
+    if (!posBranchId) {
+      throw ErrorResponse.MissingRequiredParams();
+    }
+
+    const branch = await BranchesDB.findByPosBranchId(posBranchId);
+    if (!branch) {
+      throw ErrorResponse.NotFound();
+    }
+
+    return res.json(ApiResponse.success({ posBranchId: branch.posBranchId, reservationsBranchId: branch.reservationsBranchId, name: branch.name }));
+  };
 }
