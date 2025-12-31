@@ -35,7 +35,7 @@ export class ReservationsController {
       }
 
       BranchCustomerDB.setBranchCustomer(branchId, params).catch(() => {});
-      await ReservationsDB.saveReservation(branchId, params);
+      await ReservationsDB.saveSync(branchId, params);
       await AdapterService.getInstance().sendReservation(branchId, params);
 
       this.saveLog('INFO', 'Reservation set successfully', branchId, params);
@@ -83,13 +83,18 @@ export class ReservationsController {
   };
 
   public static getTodayReservations: ControllerHandler<ReservationDto[]> = async (req, res) => {
-    const { externalBranchId } = req.body;
+    const { externalBranchId, branchId } = req.body;
 
-    if (!externalBranchId) {
+    if (!externalBranchId || !branchId) {
       throw ErrorResponse.InvalidParams();
     }
 
     const syncs = await OntopoService.getInstance().getTodayReservations(externalBranchId);
+
+    if (syncs.length) {
+      await ReservationsDB.saveMultiSyncs(branchId, syncs);
+    }
+
     const reservations = syncs.map(ReservationsService.convertSyncToReservationDto);
 
     return res.json(ApiResponse.success(reservations));

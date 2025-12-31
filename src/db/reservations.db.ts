@@ -8,7 +8,7 @@ import { DB } from './db';
 export class ReservationsDB {
   private static TABLE_NAME = 'guest_reservations';
 
-  public static saveReservation = async (branchId: string, sync: Sync) => {
+  public static saveSync = async (branchId: string, sync: Sync) => {
     const reservation: Reservation = ReservationsService.convertSyncToReservation(branchId, sync);
 
     await DB.getInstance().setItemByKey(this.TABLE_NAME, reservation, {
@@ -17,6 +17,12 @@ export class ReservationsDB {
     });
 
     return reservation;
+  };
+
+  public static saveMultiSyncs = async (branchId: string, syncs: Sync[]) => {
+    const reservations: Reservation[] = syncs.map((s) => ReservationsService.convertSyncToReservation(branchId, s));
+
+    await DB.getInstance().multiWrite(this.TABLE_NAME, reservations);
   };
 
   public static fetchAndMergeReservationsWithOrders = async (orders: Order[]): Promise<Reservation[]> => {
